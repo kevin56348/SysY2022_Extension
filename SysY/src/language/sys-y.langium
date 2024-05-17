@@ -54,7 +54,7 @@ fragment Stmt:
     'break' ';' | 'continue' ';' | 
     'return' (Exp)? ';' | 
     LVal '=' 'getint''('')'';' | 
-    'printf''('('"'('%d' | STRING)?'"')(','Exp)*')'';' ;
+    'printf''('(('"%d"' | '"%d\\n"' | STRING)?)(','Exp)*')'';' ;
 
 fragment Exp:
     AddExp;
