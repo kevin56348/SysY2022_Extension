@@ -1,0 +1,12 @@
+{
+    "projectName": "SysY",
+    "languages": [{
+        "id": "sys-y",
+        "grammar": "src/language/sys-y.langium",
+        "fileExtensions": [".sysy"],
+        "textMate": {
+            "out": "syntaxes/sys-y.tmLanguage.json"
+        }
+    }],
+    "out": "src/language/generated"
+}
