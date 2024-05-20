@@ -51,6 +51,7 @@ fragment BlockItem:
 fragment Stmt:
     LVal '=' Exp ';' | (Exp)? ';' | Block | 
     'if' '(' Cond ')' Stmt ( 'else' Stmt )?  | 
+    'while' '(' Cond ')' Stmt |
     'break' ';' | 'continue' ';' | 
     'return' (Exp)? ';' | 
     LVal '=' 'getint''('')'';' | 
