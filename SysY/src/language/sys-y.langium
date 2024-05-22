@@ -1,7 +1,7 @@
 grammar SysY
 
 entry Model:
-    (decls+=Decl)* (funcdefs+=FuncDef)* MainFuncDef;
+    (decls+=Decl)* (funcdefs+=FuncDef)* mainfuncdef=MainFuncDef;
 
 // Person:
 //     'person' name=ID;
@@ -13,16 +13,19 @@ Decl:
     ConstDecl | VarDecl;
 
 FuncDef:
-    ('void' | 'int') ident=ID '(' (FuncFParams)? ')' Block;
+    ('void' | 'int') func=ID '(' (FuncFParams)? ')' Block;
 
 MainFuncDef:
     'int' 'main' '(' ')' Block;
+
+Ident:
+    name=ID;
 
 fragment ConstDecl:
     'const' 'int' ConstDef (',' ConstDef)* ';';
 
 fragment ConstDef:
-    ident=ID ('[' ConstExp ']')* '=' ConstInitVal;
+    idents+=Ident ('[' ConstExp ']')* '=' ConstInitVal;
 
 fragment ConstInitVal:
     ConstExp | ('{' ( ConstInitVal ( ',' ConstInitVal )* )? '}') ;
@@ -31,7 +34,7 @@ fragment VarDecl:
     'int' VarDef ( ',' VarDef )* ';';
 
 fragment VarDef:
-    (ident=ID ('[' ConstExp ']')*) | (ident=ID ('[' ConstExp ']')* '=' InitVal);
+    (idents+=Ident ('[' ConstExp ']')*) | (idents+=Ident ('[' ConstExp ']')* '=' InitVal);
 
 fragment InitVal:
     Exp | ('{'  (InitVal  (',' InitVal)* )?  '}');
@@ -40,13 +43,13 @@ fragment FuncFParams:
     FuncFParam (',' FuncFParam)*;
 
 fragment FuncFParam:
-    'int' ident=ID ('[' ']'  ('[' ConstExp ']')* )?;
+    'int' idents+=Ident ('[' ']'  ('[' ConstExp ']')* )?;
 
 fragment Block:
     '{' ( BlockItem )* '}';
 
 fragment BlockItem:
-    Decl | Stmt;
+    decls+=Decl | Stmt;
 
 fragment Stmt:
     LVal '=' Exp ';' | (Exp)? ';' | Block | 
@@ -64,13 +67,13 @@ fragment Cond:
     LOrExp;
 
 fragment LVal:
-    ident=ID ('[' Exp ']')*;
+    idents+=Ident ('[' Exp ']')*;
 
 fragment PrimaryExp:
-    '(' Exp ')' | LVal | number=INT;
+    numint=INT | '(' Exp ')' | LVal;
 
 fragment UnaryExp:
-    (PrimaryExp | ident=ID '(' (FuncRParams)? ')') | (('+' | '-' | '!') UnaryExp);
+    (PrimaryExp) | (idents+=Ident '(' (FuncRParams)? ')') | (('+' | '-' | '!') UnaryExp);
 
 fragment FuncRParams:
     Exp ( ',' Exp )*;
@@ -115,8 +118,8 @@ fragment ConstExp:
     AddExp;
 
 hidden terminal WS: /\s+/;
-terminal ID: /[_a-zA-Z][_a-zA-Z0-9]?[\w_]*/;
-terminal INT returns number: /[0-9]+/;
+terminal INT returns number: /[+-]?[0-9]+/;
+terminal ID: /[_a-zA-Z0-9]+[\w_]*/;
 terminal STRING: /"(\\.|[^"\\])*"|'(\\.|[^'\\])*'/;
 
 hidden terminal ML_COMMENT: /\/\*[\s\S]*?\*\//;
