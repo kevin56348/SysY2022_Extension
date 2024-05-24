@@ -19,7 +19,7 @@ ConstDecl:
     'const' 'int' const_def+=ConstDef (',' const_def+=ConstDef)* ';';
 
 ConstDef:
-    idents+=Ident ('[' const_exp+=ConstExp ']')* '=' const_init_val+=ConstInitVal;
+    idents=Ident ('[' const_exp+=ConstExp ']')* '=' const_init_val+=ConstInitVal;
 
 ConstInitVal:
     const_exp=ConstExp | ('{' ( const_init_val+=ConstInitVal ( ',' const_init_val+=ConstInitVal )* )? '}');
@@ -28,7 +28,7 @@ VarDecl:
     'int' var_def+=VarDef ( ',' var_def+=VarDef )* ';';
 
 VarDef:
-    (idents+=Ident ('[' const_exp=ConstExp ']')*) | (idents+=Ident ('[' const_exp=ConstExp ']')* '=' init_val+=InitVal);
+    (idents=Ident ('[' const_exp=ConstExp ']')*) | (idents=Ident ('[' const_exp=ConstExp ']')* '=' init_val+=InitVal);
 
 InitVal:
     exps+=Exp | ('{'  (init_vals+=InitVal  (',' init_vals+=InitVal)* )?  '}');
