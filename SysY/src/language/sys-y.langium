@@ -3,124 +3,121 @@ grammar SysY
 entry Model:
     (decls+=Decl)* (funcdefs+=FuncDef)* mainfuncdef=MainFuncDef;
 
-// Person:
-//     'person' name=ID;
-
-// Greeting:
-//     'Hello' person=[Person:ID] '!';
-
 Decl:
-    ConstDecl | VarDecl;
+    decls_spc=(ConstDecl | VarDecl);
 
 FuncDef:
-    ('void' | 'int') func=ID '(' (FuncFParams)? ')' Block;
+    ('void' | 'int') func=ID '(' (FuncFParams)? ')' blks=Block;
 
 MainFuncDef:
-    'int' 'main' '(' ')' Block;
+    'int' 'main' '(' ')' blks=Block;
 
 Ident:
     name=ID;
 
-fragment ConstDecl:
-    'const' 'int' ConstDef (',' ConstDef)* ';';
+ConstDecl:
+    'const' 'int' const_def+=ConstDef (',' const_def+=ConstDef)* ';';
 
-fragment ConstDef:
-    idents+=Ident ('[' ConstExp ']')* '=' ConstInitVal;
+ConstDef:
+    idents=Ident ('[' const_exp+=ConstExp ']')* '=' const_init_val+=ConstInitVal;
 
-fragment ConstInitVal:
-    ConstExp | ('{' ( ConstInitVal ( ',' ConstInitVal )* )? '}') ;
+ConstInitVal:
+    const_exp=ConstExp | ('{' ( const_init_val+=ConstInitVal ( ',' const_init_val+=ConstInitVal )* )? '}');
 
-fragment VarDecl:
-    'int' VarDef ( ',' VarDef )* ';';
+VarDecl:
+    'int' var_def+=VarDef ( ',' var_def+=VarDef )* ';';
 
-fragment VarDef:
-    (idents+=Ident ('[' ConstExp ']')*) | (idents+=Ident ('[' ConstExp ']')* '=' InitVal);
+VarDef:
+    (idents=Ident ('[' const_exp=ConstExp ']')*) | (idents=Ident ('[' const_exp=ConstExp ']')* '=' init_val+=InitVal);
 
-fragment InitVal:
-    Exp | ('{'  (InitVal  (',' InitVal)* )?  '}');
+InitVal:
+    exps+=Exp | ('{'  (init_vals+=InitVal  (',' init_vals+=InitVal)* )?  '}');
 
-fragment FuncFParams:
-    FuncFParam (',' FuncFParam)*;
+FuncFParams:
+    funcfp+=FuncFParam (',' funcfp+=FuncFParam)*;
 
-fragment FuncFParam:
-    'int' idents+=Ident ('[' ']'  ('[' ConstExp ']')* )?;
+FuncFParam:
+    'int' idents+=Ident ('[' ']'  ('[' const_exp+=ConstExp ']')* )?;
 
-fragment Block:
-    '{' ( BlockItem )* '}';
+Block:
+    '{' ( bis+=BlockItem )* '}';
 
-fragment BlockItem:
-    decls+=Decl | Stmt;
+BlockItem:
+    decls+=Decl | stmts+=Stmt;
 
-fragment Stmt:
-    LVal '=' Exp ';' | (Exp)? ';' | Block | 
-    'if' '(' Cond ')' Stmt ( 'else' Stmt )?  | 
-    'while' '(' Cond ')' Stmt |
-    'break' ';' | 'continue' ';' | 
-    'return' (Exp)? ';' | 
-    LVal '=' 'getint''('')'';' | 
-    'printf''('(('"%d"' | '"%d\\n"' | STRING)?)(','Exp)*')'';' ;
+Stmt:
+    lv+=LVal '=' exps+=Exp ';' |
+    (exps+=Exp)? ';' | 
+    blks+=Block | 
+    'if' '(' conds+=Cond ')' stmts+=Stmt ( 'else' stmts+=Stmt )?  | 
+    'while' '(' conds+=Cond ')' stmts+=Stmt |
+    'break' ';' | 
+    'continue' ';' | 
+    'return' (exps+=Exp)? ';' | 
+    lv+=LVal '=' 'getint''('')'';' | 
+    'printf''('str=STRING (',' exps+=Exp)*')'';';
 
-fragment Exp:
-    AddExp;
+Exp:
+    exps+=AddExp;
 
-fragment Cond:
-    LOrExp;
+Cond infers Exp:
+    exps+=LOrExp;
 
-fragment LVal:
-    idents+=Ident ('[' Exp ']')*;
+LVal:
+    idents+=Ident ('[' exps+=Exp ']')*;
 
-PrimaryExp:
-    numint=INT | '(' Exp ')' | LVal;
+PrimaryExp infers Exp:
+    numint=INT | '(' exps+=Exp ')' | lv+=LVal;
 
-fragment UnaryExp:
-    (PrimaryExp) | (idents+=Ident '(' (FuncRParams)? ')') | (('+' | '-' | '!') UnaryExp);
+UnaryExp infers Exp:
+    pexp+=PrimaryExp | (idents+=Ident '(' (funrps+=FuncRParams)? ')') | (('+' | '-' | '!') uexp+=UnaryExp);
 
-fragment FuncRParams:
-    Exp ( ',' Exp )*;
+FuncRParams:
+    exps+=Exp ( ',' exps+=Exp )*;
 
-fragment MulExp:
-    UnaryExp _MulExp;
+MulExp infers Exp:
+    uexp+=UnaryExp mexp+=_MulExp;
 
-fragment _MulExp:
-    (('*' | '/' | '%') UnaryExp)*;
+_MulExp infers Exp:
+    (('*' | '/' | '%') uexp+=UnaryExp)*;
 
-fragment AddExp:
-    MulExp _AddExp;
+AddExp infers Exp:
+    mexp+=MulExp aexp+=_AddExp;
 
-fragment _AddExp:
-    (('+' | '-') MulExp)*;
+_AddExp infers Exp:
+    (('+' | '-')  mexp+=MulExp)*;
 
-fragment RelExp:
-    AddExp _RelExp;
+RelExp infers Exp:
+    aexp+=AddExp rexp+=_RelExp;
 
-fragment _RelExp:
-    (('<' | '>' | '<=' | '>=') AddExp)*;
+_RelExp infers Exp:
+    (('<' | '>' | '<=' | '>=') aexp+=AddExp)*;
 
-fragment EqExp:
-    RelExp _EqExp;
+EqExp infers Exp:
+    rexp+=RelExp eexp+=_EqExp;
 
-fragment _EqExp:
-    (('==' | '!=') RelExp)*;
+_EqExp infers Exp:
+    (('==' | '!=') rexp+=RelExp)*;
 
-fragment LAndExp:
-    EqExp _LAndExp;
+LAndExp infers Exp:
+    eexp+=EqExp laexp+=_LAndExp;
 
-fragment _LAndExp:
-    ('&&' EqExp)*;
+_LAndExp infers Exp:
+    ('&&' eexp+=EqExp)*;
 
-fragment LOrExp:
-    LAndExp _LOrExp;
+LOrExp infers Exp:
+    laexp+=LAndExp loexp+=_LOrExp;
 
-fragment _LOrExp:
-    ('||' LAndExp)*;
+_LOrExp infers Exp:
+    ('||' laexp+=LAndExp)*;
 
-fragment ConstExp:
-    AddExp;
+ConstExp infers Exp:
+    aexp+=AddExp;
 
-hidden terminal WS: /\s+/;
-terminal INT returns number: /[+-]?[0-9]+/;
-terminal ID: /[_a-zA-Z0-9]+[\w_]*/;
-terminal STRING: /"(\\.|[^"\\])*"|'(\\.|[^'\\])*'/;
+hidden terminal WS returns string: /\s+/;
+terminal ID returns string: /[_a-zA-Z][_a-zA-Z0-9]*[\w_]*/;
+terminal INT returns number: /[+-]?[1-9][0-9]*|[+-]?[0-9]/;
+terminal STRING returns string: /"(\\.|[^"\\])*"/;
 
-hidden terminal ML_COMMENT: /\/\*[\s\S]*?\*\//;
-hidden terminal SL_COMMENT: /\/\/[^\n\r]*/;
+hidden terminal ML_COMMENT returns string: /\/\*[\s\S]*?\*\//;
+hidden terminal SL_COMMENT returns string: /\/\/[^\n\r]*/;

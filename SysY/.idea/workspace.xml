@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="94b49780-e30a-4109-89dd-ff57eee10c33" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/SysY-0.0.1.vsix" beforeDir="false" afterPath="$PROJECT_DIR$/SysY-0.0.1.vsix" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/language/sys-y-validator.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/language/sys-y-validator.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/language/sys-y.langium" beforeDir="false" afterPath="$PROJECT_DIR$/src/language/sys-y.langium" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="2goKcIzevWjiv8x4nheB1OK3v9K" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="94b49780-e30a-4109-89dd-ff57eee10c33" name="Changes" comment="" />
+      <created>1716358570575</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1716358570575</updated>
+      <workItem from="1716358571174" duration="4000" />
+    </task>
+    <servers />
+  </component>
+</project>
