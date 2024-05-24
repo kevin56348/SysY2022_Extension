@@ -69,7 +69,7 @@ fragment Cond:
 fragment LVal:
     idents+=Ident ('[' Exp ']')*;
 
-fragment PrimaryExp:
+PrimaryExp:
     numint=INT | '(' Exp ')' | LVal;
 
 fragment UnaryExp:
