@@ -1,5 +1,5 @@
 import type { AstNode, ValidationAcceptor, ValidationChecks } from 'langium';
-import { SysYAstType, isModel, Exp, ConstDecl, VarDecl } from './generated/ast.js';
+import { SysYAstType, isModel, Exp, ConstDecl, VarDecl, LVal, VarDef, ConstDef} from './generated/ast.js';
 import type { SysYServices } from './sys-y-module.js';
 
 /**
@@ -10,7 +10,10 @@ export function registerValidationChecks(services: SysYServices) {
     const validator = services.validation.SysYValidator;
     const checks: ValidationChecks<SysYAstType> = {
         Model: validator.checkMyIdent, 
-        Exp: validator.checkMyNum
+        Exp: validator.checkMyNum,
+        LVal: validator.checkMultiDimensionArray,
+        VarDef: validator.checkMultiDimensionArrayDef,
+        ConstDef: validator.checkMultiDimensionArrayDef
     };
     registry.register(checks, validator);
 }
@@ -43,7 +46,19 @@ export class SysYValidator {
             }
         });
     }
-    
+
+    checkMultiDimensionArray(lvs: LVal, accept: ValidationAcceptor): void{
+        if (lvs.exps.length > 2) {
+            accept('error', 'Too many dimensions for this array' +  String(lvs.exps), { node: lvs, property: 'exps' });
+        }
+    }
+
+    checkMultiDimensionArrayDef(lvs: VarDef | ConstDef, accept: ValidationAcceptor): void{
+        if (lvs.const_exp.length > 2) {
+            accept('error', 'Too many dimensions for this array declaration' +  String(lvs.const_exp), { node: lvs, property: 'const_exp' });
+        }
+    }
+
     checkMyNum(exps: Exp, accept: ValidationAcceptor): void {
         const num = exps.numint;
         if (typeof num === 'number') {
