@@ -26,6 +26,7 @@ export class SysYValidator {
 
     // IdentsTable = new Set();
     IdentsTable = new IdentTable();
+    FuncTable = new IdentTable();
 
     checkMyIdent(model: AstNode, accept: ValidationAcceptor): void {
         if (!isModel(model)) {
@@ -60,6 +61,7 @@ export class SysYValidator {
 
         model.funcdefs.forEach(func => {
             // const myIdents = new Set();
+            this.FuncTable.add(func.func, 0, 0, '$');
             if (func.funcfps){
                 func.funcfps.funcfp.forEach(f => {
                     const str:string = f.ident.name;
@@ -179,9 +181,16 @@ export class SysYValidator {
                 accept('warning', 'Int overflow.', { node: exp, property: 'numint' });
             }
         }
-        // exp.idents.forEach(ident =>{
-        //     accept('warning', ident.name + ' EXP', { node: exp, property: 'idents' });
-        // });
+
+        
+
+        exp.idents.forEach(ident =>{
+            // accept('warning', ident.name + ' EXP', { node: exp, property: 'idents' });
+            if (!this.FuncTable.match(ident.name,'$')){
+                accept('error', 'function ' + ident.name + ' is not declared.', { node: ident, property: 'name' });
+            }
+        });
+
         // exp.lv.forEach(el=>{
         //     accept('warning', 'ExpLVal', { node: el, property: 'idents' });
         //     el.idents.forEach(eid=>{
