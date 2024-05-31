@@ -6,6 +6,10 @@ import * as vscode from 'vscode';
 let regexDec = /^-?[0-9]+$/g;
 let regexDeclRest = /(\[\d*\]){0,2}\s*=.*;/g;
 let regexConstDecl = /^\s*const\s*int\s*/g;
+let regexVarDecl = /^\s*int\s*/g;
+let regexFuncDecl = /^\s*(int|void)\s*[a-zA-Z_][a-zA-Z_0-9]*\s*\(.*/g;
+let regexFuncDeclFirst = /^\s*(int|void)\s*/g;
+let regexFuncDeclLast = /\s*\(.*/g;
 // let regexIdents = /^[a-zA-Z_][a-zA-Z_0-9]*$/g;
 
 export class SysYNumberHover implements vscode.HoverProvider {
@@ -56,7 +60,7 @@ export class SysYIdentHover implements vscode.HoverProvider {
 
         // console.log(wholeLine);
 
-        this.findAllConstDecls(document,position);
+        this.findAllConstDecls(document);
 
         let kk = null;
         let io = SysYIdentHover.identsArray.indexOf(hoveredWord);
@@ -67,24 +71,19 @@ export class SysYIdentHover implements vscode.HoverProvider {
         }
 
         if (kk) {
-            markdownString.appendCodeblock(`I am a const identifier:${hoveredWord} in line ${position.line}\n Def: ${document.lineAt(kk as number).text}\n At Line: ${kk}`, 'sys-y');
+            markdownString.appendCodeblock(`I am a happy identifier:${hoveredWord} in line ${position.line}\n Def: ${document.lineAt(kk as number).text}\n At Line: ${kk}`, 'sys-y');
         } else {
             // not found
-            markdownString.appendCodeblock(`I am a const identifier:${hoveredWord} in line ${position.line}\n ${wholeLine}`, 'sys-y');
+            markdownString.appendCodeblock(`I am a longly identifier:${hoveredWord} in line ${position.line}\n ${wholeLine}`, 'sys-y');
         }
 
         if (regexConstDecl.test(wholeLine)) {
 
             // let input: Number = Number(hoveredWord.toString());
-            
-
             console.log(wholeLine);
-
-
             return {
                 contents: [markdownString]
             };
-
         } 
 
         // markdownString.appendCodeblock('', 'sys-y');
@@ -93,31 +92,49 @@ export class SysYIdentHover implements vscode.HoverProvider {
         };
     };
 
-    findAllConstDecls(document: vscode.TextDocument, position: vscode.Position) : number | null{ 
-
+    findAllConstDecls(document: vscode.TextDocument) : number | null{ 
         for (let index = 0; index < document.lineCount; index++) {
             const element = document.lineAt(index).text;
-            
-            if (regexConstDecl.test(element) && regexDeclRest.test(element)) {
+            if (regexFuncDecl.test(element)) {
+                var t1 = element.replace(regexFuncDeclFirst, "");
+                t1 = t1.replace(regexFuncDeclLast, "");
+                console.warn(t1);
+                console.log("Ident: " + t1);
+                console.log("Line: " + index);
+                console.log("" + SysYIdentHover.identsArray);
+                if (SysYIdentHover.identsArray.indexOf(t1) == -1) {
+                    console.log("Pushed: " + [t1, index] + "\n index at:" + SysYIdentHover.identsArray.indexOf(element));
+                    SysYIdentHover.identsArray.push(t1);
+                    SysYIdentHover.identsArrayCorLineNum.push(index);
+                }
+            } else if (regexConstDecl.test(element) && regexDeclRest.test(element)) {
                 var t1 = element.replace(regexConstDecl, "");
                 t1 = t1.replace(regexDeclRest, "");
                 console.warn(t1);
                 console.log("Ident: " + t1);
-                console.log("At line: " + index);
+                console.log("Line: " + index);
                 console.log("" + SysYIdentHover.identsArray);
                 if (SysYIdentHover.identsArray.indexOf(t1) == -1) {
                     console.log("Pushed: " + [t1, index] + "\n index at:" + SysYIdentHover.identsArray.indexOf(t1));
                     SysYIdentHover.identsArray.push(t1);
                     SysYIdentHover.identsArrayCorLineNum.push(index);
                 }
-            }
-            
+            } else if (regexVarDecl.test(element) && regexDeclRest.test(element)) {
+                var t1 = element.replace(regexVarDecl, "");
+                t1 = t1.replace(regexDeclRest, "");
+                console.warn(t1);
+                console.log("Ident: " + t1);
+                console.log("Line: " + index);
+                console.log("" + SysYIdentHover.identsArray);
+                if (SysYIdentHover.identsArray.indexOf(t1) == -1) {
+                    console.log("Pushed: " + [t1, index] + "\n index at:" + SysYIdentHover.identsArray.indexOf(t1));
+                    SysYIdentHover.identsArray.push(t1);
+                    SysYIdentHover.identsArrayCorLineNum.push(index);
+                }
+            }  
         }
-
-        
         return null;
     };
-
 }
 
 

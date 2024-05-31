@@ -1,5 +1,5 @@
 import type { AstNode, ValidationAcceptor, ValidationChecks } from 'langium';
-import { SysYAstType, isModel, Exp, ConstDecl, VarDecl, LVal, VarDef, ConstDef} from './generated/ast.js';
+import { SysYAstType, isModel, Exp,  LVal, VarDef, ConstDef} from './generated/ast.js';
 import type { SysYServices } from './sys-y-module.js';
 
 /**
@@ -28,23 +28,23 @@ export class SysYValidator {
             throw new Error('');
         }
         // const myIdents = new Set();
-        model.decls.forEach(de => {
-            if (de.decls_spc.$type == "ConstDecl") {
-                (de.decls_spc as ConstDecl).const_def.forEach(d => {
-                    const str: string = d.idents.name;
-                    if (!this.checkIdent(str)) {
-                        accept('error', 'Idents should be started with _ a-z A-Z.' + str + String(this.checkIdent(str)), { node: d, property: 'idents' });
-                    }
-                });
-            } else if(de.decls_spc.$type == "VarDecl"){
-                (de.decls_spc as VarDecl).var_def.forEach(d => {
-                    const str: string = d.idents.name;
-                    if (!this.checkIdent(str)) {
-                        accept('error', 'Idents should be started with _ a-z A-Z.' + str + String(this.checkIdent(str)), { node: d, property: 'idents' });
-                    }
-                });
-            }
-        });
+        // model.decls.forEach(de => {
+        //     if (de.decls_spc.$type == "ConstDecl") {
+        //         (de.decls_spc as ConstDecl).const_def.forEach(d => {
+        //             const str: string = d.idents.name;
+        //             if (!this.checkIdent(str)) {
+        //                 accept('error', 'Idents should be started with _ a-z A-Z.' + str + String(this.checkIdent(str)), { node: d, property: 'idents' });
+        //             }
+        //         });
+        //     } else if(de.decls_spc.$type == "VarDecl"){
+        //         (de.decls_spc as VarDecl).var_def.forEach(d => {
+        //             const str: string = d.idents as string;
+        //             if (!this.checkIdent(str)) {
+        //                 accept('error', 'Idents should be started with _ a-z A-Z.' + str + String(this.checkIdent(str)), { node: d, property: 'idents' });
+        //             }
+        //         });
+        //     }
+        // });
     }
 
     checkMultiDimensionArray(lvs: LVal, accept: ValidationAcceptor): void{
@@ -82,4 +82,6 @@ export class SysYValidator {
         const Minnum: Number = -2147483648;
         return num > Minnum && num < Maxnum;
     }
+
+
 }

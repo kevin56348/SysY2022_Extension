@@ -46,7 +46,7 @@ BlockItem:
     decls+=Decl | stmts+=Stmt;
 
 Stmt:
-    lv+=LVal '=' exps+=Exp ';' |
+    lv=LVal '=' exps+=Exp ';' |
     (exps+=Exp)? ';' | 
     blks+=Block | 
     'if' '(' conds+=Cond ')' stmts+=Stmt ( 'else' stmts+=Stmt )?  | 
@@ -64,7 +64,7 @@ Cond infers Exp:
     exps+=LOrExp;
 
 LVal:
-    idents+=Ident ('[' exps+=Exp ']')*;
+    idents=Ident ('[' exps+=Exp ']')*;
 
 PrimaryExp infers Exp:
     numint=INT | '(' exps+=Exp ')' | lv+=LVal;
