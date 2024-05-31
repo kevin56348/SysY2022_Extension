@@ -7,7 +7,7 @@ Decl:
     decls_spc=(ConstDecl | VarDecl);
 
 FuncDef:
-    ('void' | 'int') func=ID '(' (FuncFParams)? ')' blks=Block;
+    ('void' | 'int') func=ID '(' (funcfps=FuncFParams)? ')' blks=Block;
 
 MainFuncDef:
     'int' 'main' '(' ')' blks=Block;
@@ -19,10 +19,10 @@ ConstDecl:
     'const' 'int' const_def+=ConstDef (',' const_def+=ConstDef)* ';';
 
 ConstDef:
-    idents=Ident ('[' const_exp+=ConstExp ']')* '=' const_init_val+=ConstInitVal;
+    idents=Ident ('[' const_exp+=ConstExp ']')* '=' const_init_val=ConstInitVal;
 
 ConstInitVal:
-    const_exp=ConstExp | ('{' ( const_init_val+=ConstInitVal ( ',' const_init_val+=ConstInitVal )* )? '}');
+    const_exp+=ConstExp | ('{' ( const_init_val+=ConstInitVal ( ',' const_init_val+=ConstInitVal )* )? '}');
 
 VarDecl:
     'int' var_def+=VarDef ( ',' var_def+=VarDef )* ';';
@@ -37,7 +37,7 @@ FuncFParams:
     funcfp+=FuncFParam (',' funcfp+=FuncFParam)*;
 
 FuncFParam:
-    'int' idents+=Ident ('[' ']'  ('[' const_exp+=ConstExp ']')* )?;
+    'int' ident=Ident ('[' ']'  ('[' const_exp+=ConstExp ']')* )?;
 
 Block:
     '{' ( bis+=BlockItem )* '}';
