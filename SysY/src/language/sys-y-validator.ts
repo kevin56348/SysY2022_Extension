@@ -133,6 +133,27 @@ export class SysYValidator {
     //                             e.idents.forEach(ident =>{
     //                                 accept('error', ident.name + ' ExpExp', { node: ident, property: 'name' });
     //                             });
+
+    //                             e.lv.forEach(el=>{
+    //                                 accept('error', 'ExpExpLVal', { node: el, property: 'idents' });
+    //                                 el.idents.forEach(ident =>{
+    //                                     accept('error', ident.name + ' ExpExpLVal', { node: ident, property: 'name' });
+    //                                 });
+    //                             });
+
+    //                             e.exps.forEach(ee=>{
+    //                                 accept('error', 'ExpExpExp', { node: ee, property: 'idents' });
+    //                                 ee.idents.forEach(ident =>{
+    //                                     accept('error', ident.name + ' ExpExpExp', { node: ident, property: 'name' });
+    //                                 });
+
+    //                                 ee.lv.forEach(eel=>{
+    //                                     accept('error', 'ExpExpExpLVal', { node: eel, property: 'idents' });
+    //                                     eel.idents.forEach(ident =>{
+    //                                         accept('error', ident.name + ' ExpExpExpLVal', { node: ident, property: 'name' });
+    //                                     });
+    //                                 });
+    //                             });
     //                         });
 
     //                         cexp.idents.forEach(ident =>{

@@ -112,7 +112,7 @@ _LOrExp infers Exp:
     ('||' laexp+=LAndExp)*;
 
 ConstExp infers Exp:
-    aexp+=AddExp;
+    exps+=AddExp;
 
 hidden terminal WS returns string: /\s+/;
 terminal ID returns string: /[_a-zA-Z][_a-zA-Z0-9]*[\w_]*/;
