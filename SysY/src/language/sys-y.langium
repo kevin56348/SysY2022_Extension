@@ -64,7 +64,7 @@ Cond infers Exp:
     exps+=LOrExp;
 
 LVal:
-    idents=Ident ('[' exps+=Exp ']')*;
+    idents+=Ident ('[' exps+=Exp ']')*;
 
 PrimaryExp infers Exp:
     numint=INT | '(' exps+=Exp ')' | lv+=LVal;
