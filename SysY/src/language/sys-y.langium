@@ -28,7 +28,7 @@ VarDecl:
     'int' var_def+=VarDef ( ',' var_def+=VarDef )* ';';
 
 VarDef:
-    (idents=Ident ('[' const_exp=ConstExp ']')*) | (idents=Ident ('[' const_exp=ConstExp ']')* '=' init_val+=InitVal);
+    (idents=Ident ('[' const_exp+=ConstExp ']')*) | (idents=Ident ('[' const_exp+=ConstExp ']')* '=' init_val+=InitVal);
 
 InitVal:
     exps+=Exp | ('{'  (init_vals+=InitVal  (',' init_vals+=InitVal)* )?  '}');
@@ -46,7 +46,7 @@ BlockItem:
     decls+=Decl | stmts+=Stmt;
 
 Stmt:
-    lv+=LVal '=' exps+=Exp ';' |
+    lv=LVal '=' exps+=Exp ';' |
     (exps+=Exp)? ';' | 
     blks+=Block | 
     'if' '(' conds+=Cond ')' stmts+=Stmt ( 'else' stmts+=Stmt )?  | 

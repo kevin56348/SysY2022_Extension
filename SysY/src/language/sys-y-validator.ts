@@ -1,5 +1,5 @@
 import type { AstNode, ValidationAcceptor, ValidationChecks } from 'langium';
-import { SysYAstType, isModel, Exp, ConstDecl, VarDecl, LVal } from './generated/ast.js';
+import { SysYAstType, isModel, Exp, ConstDecl, VarDecl, LVal, VarDef, ConstDef } from './generated/ast.js';
 import type { SysYServices } from './sys-y-module.js';
 // import * as vscode from 'vscode';
 import {IdentTable} from './IdentTable.js'
@@ -12,9 +12,11 @@ export function registerValidationChecks(services: SysYServices) {
     const validator = services.validation.SysYValidator;
     const checks: ValidationChecks<SysYAstType> = {
         Model: validator.checkMyIdent, 
+        LVal: [validator.checkMultiDimensionArray, validator.checkLVal],
+        VarDef: validator.checkMultiDimensionArrayDef,
+        ConstDef: validator.checkMultiDimensionArrayDef,
         // FuncDef: validator.checkFunc,
         Exp: validator.checkExp,
-        LVal: validator.checkLVal
     };
     registry.register(checks, validator);
 }
@@ -118,8 +120,20 @@ export class SysYValidator {
                 }
             });
         });
+
     }
-    
+    checkMultiDimensionArray(lvs: LVal, accept: ValidationAcceptor): void{
+        if (lvs.exps.length > 2) {
+            accept('error', 'Too many dimensions for this array' +  String(lvs.exps), { node: lvs, property: 'exps' });
+        }
+    }
+
+    checkMultiDimensionArrayDef(lvs: VarDef | ConstDef, accept: ValidationAcceptor): void{
+        if (lvs.const_exp.length > 2) {
+            accept('error', 'Too many dimensions for this array declaration' +  String(lvs.const_exp), { node: lvs, property: 'const_exp' });
+        }
+    }
+
     // checkFunc(func: FuncDef, accept: ValidationAcceptor): void {
     //     func.blks.bis.forEach(bi=>{
     //         bi.decls.forEach(de=>{
@@ -132,27 +146,6 @@ export class SysYValidator {
     //                             accept('error', 'ExpExp', { node: e, property: 'idents' });
     //                             e.idents.forEach(ident =>{
     //                                 accept('error', ident.name + ' ExpExp', { node: ident, property: 'name' });
-    //                             });
-
-    //                             e.lv.forEach(el=>{
-    //                                 accept('error', 'ExpExpLVal', { node: el, property: 'idents' });
-    //                                 el.idents.forEach(ident =>{
-    //                                     accept('error', ident.name + ' ExpExpLVal', { node: ident, property: 'name' });
-    //                                 });
-    //                             });
-
-    //                             e.exps.forEach(ee=>{
-    //                                 accept('error', 'ExpExpExp', { node: ee, property: 'idents' });
-    //                                 ee.idents.forEach(ident =>{
-    //                                     accept('error', ident.name + ' ExpExpExp', { node: ident, property: 'name' });
-    //                                 });
-
-    //                                 ee.lv.forEach(eel=>{
-    //                                     accept('error', 'ExpExpExpLVal', { node: eel, property: 'idents' });
-    //                                     eel.idents.forEach(ident =>{
-    //                                         accept('error', ident.name + ' ExpExpExpLVal', { node: ident, property: 'name' });
-    //                                     });
-    //                                 });
     //                             });
     //                         });
 
