@@ -36,6 +36,8 @@ export class SysYValidator {
         }
         
         // const myIdents = new Set();
+        this.IdentsTable = new IdentTable();
+        this.FuncTable = new IdentTable();
         model.decls.forEach(de => {
             if (de.decls_spc.$type == "ConstDecl") {
                 (de.decls_spc as ConstDecl).const_def.forEach(d => {

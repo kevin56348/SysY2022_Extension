@@ -58,7 +58,13 @@
                 "scopeName": "source.sys-y",
                 "path": "syntaxes/sys-y.tmLanguage.json"
             }
-        ]
+        ],
+		"snippets": [
+			{
+				"language": "sys-y",
+				"path": "./snippets.json"
+			}
+		]
     },
     "activationEvents": [
         "onLanguage:sys-y"

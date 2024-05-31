@@ -1,0 +1,108 @@
+{
+	"while": {
+		"prefix": "while",
+		"body": [
+			"while ($1)",
+			"{",
+			"\t$2",
+			"}"
+		],
+		"description": ""
+	},
+	"if": {
+		"prefix": "if",
+		"body": [
+			"if ($1)",
+			"{",
+			"\t$2",
+			"}"
+		],
+		"description": "Code snippet for if statement"
+	},
+	"else": {
+		"prefix": "else",
+		"body": [
+			"else",
+			"{",
+			"\t$1",
+			"}"
+		],
+		"description": "Code snippet for else statement"
+	},
+	"else if": {
+		"prefix": "else if",
+		"body": [
+			"else if ($1)",
+			"{",
+			"\t$2",
+			"}"
+		],
+		"description": "Code snippet for else-if statement"
+	},
+    "int": {
+        "prefix": "int",
+        "body": [
+			"int ${1:ident} = ${2:val};",
+            "$2"
+		],
+		"description": "Code snippet for int decl"
+    },
+    "const int": {
+        "prefix": "const",
+        "body": [
+			"const int ${1:ident} = ${2:val};",
+            "$3"
+		],
+		"description": "Code snippet for int decl"
+    },
+    "arr":{
+        "prefix": "arr",
+        "body": [
+			"int ${1:array}[${2:row}] = {${3:init},};"
+		],
+		"description": "Code snippet for array decl"
+    },
+    "mat":{
+        "prefix": "mat",
+        "body": [
+			"int ${1:array}[${2:row}][${3:col}] = {{${4:init}},};"
+		],
+		"description": "Code snippet for mat decl"
+    },
+    "sys":{
+        "prefix": "SYS!",
+        "body": [
+			"/*",
+            " *    __ __    ____         _____  _______  _____ ___  ___  ___  ______",
+            " *   / // /__ / / /__      / __| \/ / __| \/ /_  / _ \\|_  ||_  |/ __/ /",
+            " *  / _  / -_) / / _ \\_   _\\ \\  \\  /\\ \\  \\  / __/ // / __// __// _//_/ ",
+            " * /_//_/\\__/_/_/\\___( ) /___/  /_/___/  /_/____|___/____/____/___(_)  ",
+            " *                   |/                                                ",
+            "*/"
+		],
+		"description": "Code snippet for sys"
+    },
+    "filedoc":{
+        "prefix": "///<",
+        "body": [
+            " /**",
+            " * 文件名: ${1:filename}.sysy",
+            " * 项目名称: ${2:projname} Project",
+            " * 文件创建日期: ${3:date}",
+            " * 作者: ${4:author}",
+            " * 联系方式: ${5:email}",
+            " *",
+            " * 最后编辑日期: ${6:date}",
+            " * 最后编辑者: ${7:last_editor}",
+            " * 最后编辑者联系方式: ${8:email}",
+            " *",
+            " * 文件描述:",
+            " * ${9:description}",
+            " * 许可证:",
+            " * ${10:lisence}",
+            " */"
+		],
+		"description": "Code snippet for file doc decl"
+    }
+	
+}
