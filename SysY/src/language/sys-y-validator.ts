@@ -2,7 +2,8 @@ import type { AstNode, ValidationAcceptor, ValidationChecks } from 'langium';
 import { SysYAstType, isModel, Exp, ConstDecl, VarDecl, LVal, VarDef, ConstDef } from './generated/ast.js';
 import type { SysYServices } from './sys-y-module.js';
 // import * as vscode from 'vscode';
-import {IdentTable} from './IdentTable.js'
+import {IdentTable} from '../utils/IdentTable.js'
+import { creatIdentTable } from "../utils/lex.js";
 
 /**
  * Register custom validation checks.
@@ -27,7 +28,16 @@ export function registerValidationChecks(services: SysYServices) {
 export class SysYValidator {
 
     // IdentsTable = new Set();
-    IdentsTable = new IdentTable();
+    // IdentsTable = new IdentTable();
+    identsTable = creatIdentTable();
+    // disposable = vscode.commands.registerCommand('extension.showCurrentLineNumber', () => {
+    //     const editor = vscode.window.activeTextEditor;
+    //     if (editor) {
+    //         console.log("~~~~~~~");
+    //         const document = editor.document;
+    //         this.identsTable = creatIdentTable(document);
+    //     }
+    // });
     FuncTable = new IdentTable();
 
     checkMyIdent(model: AstNode, accept: ValidationAcceptor): void {
@@ -41,7 +51,7 @@ export class SysYValidator {
                 (de.decls_spc as ConstDecl).const_def.forEach(d => {
                     const str: string = d.idents.name;
                     // myIdents.add(str);
-                    this.IdentsTable.add(str, 0, 0, 'global');
+                    //this.IdentsTable.add(str, 0, 0, 'global');
                     // accept('error', String(myIdents.size) + str, { node: d, property: 'idents' });
                     if (!this.checkIdent(str)) {
                         accept('error', 'Idents should be started with _ a-z A-Z.' + str + String(this.checkIdent(str)), { node: d, property: 'idents' });
@@ -52,7 +62,7 @@ export class SysYValidator {
                     const str: string = d.idents.name;
                     // accept('error', String(myIdents.size) + str, { node: d, property: 'idents' });
                     // myIdents.add(str);
-                    this.IdentsTable.add(str, 0, 0, 'global');
+                    //this.IdentsTable.add(str, 0, 0, 'global');
                     if (!this.checkIdent(str)) {
                         accept('error', 'Idents should be started with _ a-z A-Z.' + str + String(this.checkIdent(str)), { node: d, property: 'idents' });
                     }
@@ -66,9 +76,9 @@ export class SysYValidator {
             this.FuncTable.add(func.func, 0, 0, '$');
             if (func.funcfps){
                 func.funcfps.funcfp.forEach(f => {
-                    const str:string = f.ident.name;
+                    // const str:string = f.ident.name;
                     // myIdents.add(str);
-                    this.IdentsTable.add(str, 0, 1, func.func);
+                    //this.IdentsTable.add(str, 0, 1, func.func);
                 });
             }
             func.blks.bis.forEach(bi => {
@@ -77,7 +87,7 @@ export class SysYValidator {
                         (de.decls_spc as ConstDecl).const_def.forEach(d => {
                             const str: string = d.idents.name;
                             // myIdents.add(str);
-                            this.IdentsTable.add(str, 0, 1, func.func);
+                            //this.IdentsTable.add(str, 0, 1, func.func);
                             if (!this.checkIdent(str)) {
                                 accept('error', 'Idents should be started with _ a-z A-Z.' + str + String(this.checkIdent(str)), { node: d, property: 'idents' });
                             }
@@ -86,7 +96,7 @@ export class SysYValidator {
                         (de.decls_spc as VarDecl).var_def.forEach(d => {
                             const str: string = d.idents.name;
                             // myIdents.add(str);
-                            this.IdentsTable.add(str, 0, 1, func.func);
+                            //this.IdentsTable.add(str, 0, 1, func.func);
                             if (!this.checkIdent(str)) {
                                 accept('error', 'Idents should be started with _ a-z A-Z.' + str + String(this.checkIdent(str)), { node: d, property: 'idents' });
                             }
@@ -103,7 +113,7 @@ export class SysYValidator {
                     (de.decls_spc as ConstDecl).const_def.forEach(d => {
                         const str: string = d.idents.name;
                         // myIdents.add(str);
-                        this.IdentsTable.add(str, 0, 1, 'main');
+                        //this.IdentsTable.add(str, 0, 1, 'main');
                         if (!this.checkIdent(str)) {
                             accept('error', 'Idents should be started with _ a-z A-Z.' + str + String(this.checkIdent(str)), { node: d, property: 'idents' });
                         }
@@ -112,7 +122,7 @@ export class SysYValidator {
                     (de.decls_spc as VarDecl).var_def.forEach(d => {
                         const str: string = d.idents.name;
                         // myIdents.add(str);
-                        this.IdentsTable.add(str, 0, 1, 'main');
+                        //this.IdentsTable.add(str, 0, 1, 'main');
                         if (!this.checkIdent(str)) {
                             accept('error', 'Idents should be started with _ a-z A-Z.' + str + String(this.checkIdent(str)), { node: d, property: 'idents' });
                         }
@@ -227,7 +237,7 @@ export class SysYValidator {
         lval.idents.forEach(ident =>{
             // accept('warning', ident.name + ' is not declared.', { node: ident, property: 'name' });
             // if (!this.IdentsTable.get('global').has(ident.name)){
-            if (!this.IdentsTable.match(ident.name,'global')){
+            if (!this.identsTable.match(ident.name,'global')){
                 accept('error', ident.name + ' is not declared.', { node: ident, property: 'name' });
             }
         })

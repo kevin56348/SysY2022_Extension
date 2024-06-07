@@ -1,8 +1,11 @@
 interface Node {
-    name: string;
-    line_num: number;
-    level: number;
-    func_name: string;
+    name: string; // ident name
+    line_num: number; // line number
+    level: number; //hierarchy
+    func_name: string; // in which function
+    ident_type: string; //int / void / int1 / int2(array)
+    param_num:
+    number; //func param num 
 }
 
 export class IdentTable {
@@ -12,8 +15,12 @@ export class IdentTable {
         this.nodes = [];
     }
 
-    add(name: string, line_num: number, level: number, func_name: string) {
-        this.nodes.push({ name, line_num, level, func_name });
+    add(name: string, line_num: number, level: number, func_name: string, ident_type: string = 'int', param_num:number = 0) {
+        this.nodes.push({ name, line_num, level, func_name, ident_type, param_num });
+    }
+
+    clear(){
+        this.nodes = [];
     }
 
     // match(name: string, line_num: number, level: number, func_name: string): boolean {
