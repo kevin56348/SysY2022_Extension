@@ -4,6 +4,7 @@ import * as path from 'node:path';
 import { LanguageClient, TransportKind } from 'vscode-languageclient/node.js';
 import { SysYNumberHover, SysYIdentHover } from "./hover.js"
 
+
 let client: LanguageClient;
 
 // This function is called when the extension is activated.
@@ -25,7 +26,7 @@ export function activate(context: vscode.ExtensionContext): void {
 		  new SysYIdentHover()
 		)
     );
-    
+
     client = startLanguageClient(context);
     
 }

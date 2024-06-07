@@ -1,9 +1,7 @@
 import type { AstNode, ValidationAcceptor, ValidationChecks } from 'langium';
 import { SysYAstType, isModel, Exp, ConstDecl, VarDecl, LVal, VarDef, ConstDef } from './generated/ast.js';
 import type { SysYServices } from './sys-y-module.js';
-// import * as vscode from 'vscode';
-import {IdentTable} from './IdentTable.js'
-
+import { IdentTable } from './IdentTable.js'
 /**
  * Register custom validation checks.
  */
@@ -31,6 +29,7 @@ export class SysYValidator {
     FuncTable = new IdentTable();
 
     checkMyIdent(model: AstNode, accept: ValidationAcceptor): void {
+
         if (!isModel(model)) {
             throw new Error('');
         }
