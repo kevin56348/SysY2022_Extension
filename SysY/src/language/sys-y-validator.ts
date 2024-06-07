@@ -2,6 +2,8 @@ import type { AstNode, ValidationAcceptor, ValidationChecks } from 'langium';
 import { SysYAstType, isModel, Exp, ConstDecl, VarDecl, LVal, VarDef, ConstDef } from './generated/ast.js';
 import type { SysYServices } from './sys-y-module.js';
 import {IdentTable} from '../utils/IdentTable.js'
+import * as ast from "../language/ASTTest.js"
+import * as vscode from 'vscode';
 // import { creatIdentTable } from "../utils/lex.js";
 
 /**
@@ -16,7 +18,7 @@ export function registerValidationChecks(services: SysYServices) {
         VarDef: validator.checkMultiDimensionArrayDef,
         ConstDef: validator.checkMultiDimensionArrayDef,
         // FuncDef: validator.checkFunc,
-        Exp: validator.checkExp,
+        Exp: validator.checkExp
     };
     registry.register(checks, validator);
 }
@@ -25,18 +27,16 @@ export function registerValidationChecks(services: SysYServices) {
  * Implementation of custom validations.
  */
 export class SysYValidator {
+    
+    editor = vscode.window.activeTextEditor;
+    document = (this.editor as vscode.TextEditor).document;
+    vardefs = this.findAllConstDecls(this.document);
 
-    // IdentsTable = new Set();
+    identsArray: Array<string> = [];
+    identsArrayCorLineNum: Array<number> = [];
+    identsArrayLv: Array<number> = [];
+
     IdentsTable = new IdentTable();
-    // identsTable = creatIdentTable();
-    // disposable = vscode.commands.registerCommand('extension.showCurrentLineNumber', () => {
-    //     const editor = vscode.window.activeTextEditor;
-    //     if (editor) {
-    //         console.log("~~~~~~~");
-    //         const document = editor.document;
-    //         this.identsTable = creatIdentTable(document);
-    //     }
-    // });
     FuncTable = new IdentTable();
 
     checkMyIdent(model: AstNode, accept: ValidationAcceptor): void {
@@ -263,5 +263,22 @@ export class SysYValidator {
         return num > Minnum && num < Maxnum;
     }
 
+    findAllConstDecls(document: vscode.TextDocument): number | null{ 
+        var vardefs = ast.getAstModel(document.getText());
 
+        vardefs.then(
+            res => {
+                console.error("~~~~~~~~~~~~~~~~~~~");
+                res.forEach(r => {
+                    console.log(r);
+                    this.identsArray.push(r[0]);
+                    this.identsArrayCorLineNum.push(r[1].line);
+                    this.identsArrayLv.push(r[2]);
+                });
+                
+            }
+        )
+
+        return null;
+    };
 }

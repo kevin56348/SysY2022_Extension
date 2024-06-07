@@ -17,10 +17,7 @@
         "test": "vitest --run"
     },
     "dependencies": {
-        "@babel/parser": "^7.24.7",
-        "@babel/traverse": "^7.24.7",
         "langium": "~3.0.0",
-        "vitest": "^1.6.0",
         "vscode-languageclient": "~9.0.1",
         "vscode-languageserver": "~9.0.1"
     },
