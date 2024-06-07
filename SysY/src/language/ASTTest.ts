@@ -3,10 +3,20 @@ import { Block, ConstDecl, Exp, Model, Stmt, VarDecl } from "../language/generat
 import { EmptyFileSystem } from "langium";
 import {createSysYServices} from "./sys-y-module.js"
 import { Position, Range } from "vscode";
+import * as vscode from "vscode";
 
-export async function getAstModel(doc: string) : Promise<[string, Position, number, string, Range][]>{
+export async function getAstModel() : Promise<[string, Position, number, string, Range][]>{
     const services = createSysYServices(EmptyFileSystem);
     const parse = parseHelper<Model>(services.SysY);
+
+    const td = vscode.workspace.textDocuments;
+
+    var doc: string = "";
+
+    td.forEach(t => {
+        doc += t.getText();
+        // console.log(doc);
+    });
 
     const document = await parse(doc);
 
@@ -142,6 +152,11 @@ export class Defs {
 
         });
 
+
+        // lv == 1 in mainfunc
+        
+        const mainfuncdef = model.mainfuncdef;
+        this.traverse_blk(mainfuncdef.blks, lv, "main");
 
         return this.vardefs;
     }

@@ -3,7 +3,7 @@ import { SysYAstType, isModel, Exp, ConstDecl, VarDecl, LVal, VarDef, ConstDef }
 import type { SysYServices } from './sys-y-module.js';
 import {IdentTable} from '../utils/IdentTable.js'
 import * as ast from "../language/ASTTest.js"
-import * as vscode from 'vscode';
+// import * as vscode from 'vscode';
 // import { creatIdentTable } from "../utils/lex.js";
 
 /**
@@ -27,14 +27,6 @@ export function registerValidationChecks(services: SysYServices) {
  * Implementation of custom validations.
  */
 export class SysYValidator {
-    
-    editor = vscode.window.activeTextEditor;
-    document = (this.editor as vscode.TextEditor).document;
-    vardefs = this.findAllConstDecls(this.document);
-
-    identsArray: Array<string> = [];
-    identsArrayCorLineNum: Array<number> = [];
-    identsArrayLv: Array<number> = [];
 
     IdentsTable = new IdentTable();
     FuncTable = new IdentTable();
@@ -220,22 +212,6 @@ export class SysYValidator {
             }
         });
 
-        // exp.lv.forEach(el=>{
-        //     accept('warning', 'ExpLVal', { node: el, property: 'idents' });
-        //     el.idents.forEach(eid=>{
-        //         accept('warning', 'ExpLValIdent', { node: eid, property: 'name' });
-        //     })
-        // });
-        // exp.exps.forEach(e => {
-        //     accept('warning', 'ExpExp', { node: e, property: 'idents' });
-        //     e.idents.forEach(ident =>{
-        //         accept('warning', ident.name + ' ExpExp', { node: ident, property: 'name' });
-        //     //     if (myIdents.has(ident.name)){
-        //     //         accept('error', 'Ident is not declared.', { node: ident, property: 'name' });
-        //     // }
-
-        //     });
-        // });
     }
 
     checkLVal(lval: LVal, accept: ValidationAcceptor): void {
@@ -262,23 +238,4 @@ export class SysYValidator {
         const Minnum: Number = -2147483648;
         return num > Minnum && num < Maxnum;
     }
-
-    findAllConstDecls(document: vscode.TextDocument): number | null{ 
-        var vardefs = ast.getAstModel(document.getText());
-
-        vardefs.then(
-            res => {
-                console.error("~~~~~~~~~~~~~~~~~~~");
-                res.forEach(r => {
-                    console.log(r);
-                    this.identsArray.push(r[0]);
-                    this.identsArrayCorLineNum.push(r[1].line);
-                    this.identsArrayLv.push(r[2]);
-                });
-                
-            }
-        )
-
-        return null;
-    };
 }
