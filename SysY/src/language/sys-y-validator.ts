@@ -73,7 +73,8 @@ export class SysYValidator {
                 });
             }
             func.blks.bis.forEach(bi => {
-                bi.decls.forEach(de => {
+                if (bi.decls) {
+                    const de = bi.decls;
                     if (de.decls_spc.$type == "ConstDecl") {
                         (de.decls_spc as ConstDecl).const_def.forEach(d => {
                             const str: string = d.idents.name;
@@ -93,13 +94,14 @@ export class SysYValidator {
                             }
                         });
                     }
-                });
+                }
             });
             // this.IdentsTable.set(func.func, myIdents);
         });
 
         model.mainfuncdef.blks.bis.forEach(bi => {
-            bi.decls.forEach(de => {
+            if (bi.decls) {
+                const de = bi.decls;
                 if (de.decls_spc.$type == "ConstDecl") {
                     (de.decls_spc as ConstDecl).const_def.forEach(d => {
                         const str: string = d.idents.name;
@@ -119,7 +121,8 @@ export class SysYValidator {
                         }
                     });
                 }
-            });
+            }
+            
         });
 
     }

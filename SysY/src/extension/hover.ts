@@ -37,6 +37,7 @@ export class SysYIdentHover implements vscode.HoverProvider {
 
     identsArray: Array<string> = [];
     identsArrayCorLineNum: Array<number> = [];
+    identsArrayLv: Array<number> = [];
 
     public async provideHover(
         document: vscode.TextDocument,
@@ -47,6 +48,7 @@ export class SysYIdentHover implements vscode.HoverProvider {
         let markdownString = new vscode.MarkdownString();
         this.identsArray = [];
         this.identsArrayCorLineNum = [];
+        this.identsArrayLv = [];
         // console.log(wholeLine);
         this.findAllConstDecls(document);
         let kk = null;
@@ -85,6 +87,7 @@ export class SysYIdentHover implements vscode.HoverProvider {
                     console.log(r);
                     this.identsArray.push(r[0]);
                     this.identsArrayCorLineNum.push(r[1].line);
+                    this.identsArrayLv.push(r[2]);
                 });
                 
             }
