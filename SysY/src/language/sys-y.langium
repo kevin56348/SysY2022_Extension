@@ -28,10 +28,10 @@ VarDecl:
     'int' var_def+=VarDef ( ',' var_def+=VarDef )* ';';
 
 VarDef:
-    (idents=Ident ('[' const_exp+=ConstExp ']')*) | (idents=Ident ('[' const_exp+=ConstExp ']')* '=' init_val+=InitVal);
+    (idents=Ident ('[' const_exp+=ConstExp ']')*) | (idents=Ident ('[' const_exp+=ConstExp ']')* '=' init_val=InitVal);
 
 InitVal:
-    exps+=Exp | ('{'  (init_vals+=InitVal  (',' init_vals+=InitVal)* )?  '}');
+    exps=Exp | ('{'  (init_vals+=InitVal  (',' init_vals+=InitVal)* )?  '}');
 
 FuncFParams:
     funcfp+=FuncFParam (',' funcfp+=FuncFParam)*;

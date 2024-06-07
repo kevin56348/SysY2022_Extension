@@ -1,15 +1,16 @@
 import * as vscode from 'vscode';
+import * as ast from "../language/ASTTest.js"
 // import { ConstDef } from '../language/generated/ast.js';
 // import type { AstNode, ValidationAcceptor } from 'langium';
 
 
 let regexDec = /^-?[0-9]+$/g;
-let regexDeclRest = /(\[\d*\]){0,2}(\s*=.*)?\s*;/g;
+// let regexDeclRest = /(\[\d*\]){0,2}(\s*=.*)?\s*;/g;
 let regexConstDecl = /^\s*const\s*int\s*/g;
-let regexVarDecl = /^\s*int\s*/g;
-let regexFuncDecl = /^\s*(int|void)\s*[a-zA-Z_][a-zA-Z_0-9]*\s*\(.*/g;
-let regexFuncDeclFirst = /^\s*(int|void)\s*/g;
-let regexFuncDeclLast = /\s*\(.*/g;
+// let regexVarDecl = /^\s*int\s*/g;
+// let regexFuncDecl = /^\s*(int|void)\s*[a-zA-Z_][a-zA-Z_0-9]*\s*\(.*/g;
+// let regexFuncDeclFirst = /^\s*(int|void)\s*/g;
+// let regexFuncDeclLast = /\s*\(.*/g;
 // let regexIdents = /^[a-zA-Z_][a-zA-Z_0-9]*$/g;
 
 export class SysYNumberHover implements vscode.HoverProvider {
@@ -74,47 +75,21 @@ export class SysYIdentHover implements vscode.HoverProvider {
         };
     };
 
-    findAllConstDecls(document: vscode.TextDocument) : number | null{ 
-        for (let index = 0; index < document.lineCount; index++) {
-            const element = document.lineAt(index).text;
-            if (regexFuncDecl.test(element)) {
-                var t1 = element.replace(regexFuncDeclFirst, "");
-                t1 = t1.replace(regexFuncDeclLast, "");
-                console.warn(t1);
-                console.log("Ident: " + t1);
-                console.log("Line: " + index);
-                console.log("" + this.identsArray);
-                if (this.identsArray.indexOf(t1) == -1) {
-                    console.log("Pushed: " + [t1, index] + "\n index at:" + this.identsArray.indexOf(element));
-                    this.identsArray.push(t1);
-                    this.identsArrayCorLineNum.push(index);
-                }
-            } else if (regexConstDecl.test(element) && regexDeclRest.test(element)) {
-                var t1 = element.replace(regexConstDecl, "");
-                t1 = t1.replace(regexDeclRest, "");
-                console.warn(t1);
-                console.log("Ident: " + t1);
-                console.log("Line: " + index);
-                console.log("" + this.identsArray);
-                if (this.identsArray.indexOf(t1) == -1) {
-                    console.log("Pushed: " + [t1, index] + "\n index at:" + this.identsArray.indexOf(t1));
-                    this.identsArray.push(t1);
-                    this.identsArrayCorLineNum.push(index);
-                }
-            } else if (regexVarDecl.test(element) && regexDeclRest.test(element)) {
-                var t1 = element.replace(regexVarDecl, "");
-                t1 = t1.replace(regexDeclRest, "");
-                console.warn(t1);
-                console.log("Ident: " + t1);
-                console.log("Line: " + index);
-                console.log("" + this.identsArray);
-                if (this.identsArray.indexOf(t1) == -1) {
-                    console.log("Pushed: " + [t1, index] + "\n index at:" + this.identsArray.indexOf(t1));
-                    this.identsArray.push(t1);
-                    this.identsArrayCorLineNum.push(index);
-                }
-            }  
-        }
+    findAllConstDecls(document: vscode.TextDocument): number | null{ 
+        var vardefs = ast.getAstModel(document.getText());
+
+        vardefs.then(
+            res => {
+                // console.log(res);
+                res.forEach(r => {
+                    console.log(r);
+                    this.identsArray.push(r[0]);
+                    this.identsArrayCorLineNum.push(r[1].line);
+                });
+                
+            }
+        )
+
         return null;
     };
 }
