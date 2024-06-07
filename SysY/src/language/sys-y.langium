@@ -43,18 +43,18 @@ Block:
     '{' ( bis+=BlockItem )* '}';
 
 BlockItem:
-    decls+=Decl | stmts+=Stmt;
+    decls=Decl | stmts=Stmt;
 
 Stmt:
-    lv=LVal '=' exps+=Exp ';' |
-    (exps+=Exp)? ';' | 
-    blks+=Block | 
-    'if' '(' conds+=Cond ')' stmts+=Stmt ( 'else' stmts+=Stmt )?  | 
+    lv=LVal '=' exps=Exp ';' |
+    (exps=Exp)? ';' | 
+    blks=Block | 
+    'if' '(' conds=Cond ')' stmts+=Stmt ( 'else' stmts+=Stmt )?  | 
     'while' '(' conds+=Cond ')' stmts+=Stmt |
     'break' ';' | 
     'continue' ';' | 
     'return' (exps+=Exp)? ';' | 
-    lv+=LVal '=' 'getint''('')'';' | 
+    lv=LVal '=' 'getint''('')'';' | 
     'printf''('str=STRING (',' exps+=Exp)*')'';';
 
 Exp:
