@@ -2,6 +2,7 @@ import type { AstNode, ValidationAcceptor, ValidationChecks } from 'langium';
 import { SysYAstType, isModel, Exp, ConstDecl, VarDecl, LVal, VarDef, ConstDef } from './generated/ast.js';
 import type { SysYServices } from './sys-y-module.js';
 import { IdentTable } from './IdentTable.js'
+// import * as vscode from 'vscode';
 /**
  * Register custom validation checks.
  */
@@ -23,6 +24,7 @@ export function registerValidationChecks(services: SysYServices) {
  * Implementation of custom validations.
  */
 export class SysYValidator {
+    
 
     // IdentsTable = new Set();
     IdentsTable = new IdentTable();
@@ -156,22 +158,6 @@ export class SysYValidator {
             }
         });
 
-        // exp.lv.forEach(el=>{
-        //     accept('warning', 'ExpLVal', { node: el, property: 'idents' });
-        //     el.idents.forEach(eid=>{
-        //         accept('warning', 'ExpLValIdent', { node: eid, property: 'name' });
-        //     })
-        // });
-        // exp.exps.forEach(e => {
-        //     accept('warning', 'ExpExp', { node: e, property: 'idents' });
-        //     e.idents.forEach(ident =>{
-        //         accept('warning', ident.name + ' ExpExp', { node: ident, property: 'name' });
-        //     //     if (myIdents.has(ident.name)){
-        //     //         accept('error', 'Ident is not declared.', { node: ident, property: 'name' });
-        //     // }
-
-        //     });
-        // });
     }
 
     checkLVal(lval: LVal, accept: ValidationAcceptor): void {

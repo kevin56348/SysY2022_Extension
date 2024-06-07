@@ -1,17 +1,9 @@
 import * as vscode from 'vscode';
 import * as ast from "../language/ASTTest.js"
-// import { ConstDef } from '../language/generated/ast.js';
-// import type { AstNode, ValidationAcceptor } from 'langium';
 
 
 let regexDec = /^-?[0-9]+$/g;
-// let regexDeclRest = /(\[\d*\]){0,2}(\s*=.*)?\s*;/g;
 let regexConstDecl = /^\s*const\s*int\s*/g;
-// let regexVarDecl = /^\s*int\s*/g;
-// let regexFuncDecl = /^\s*(int|void)\s*[a-zA-Z_][a-zA-Z_0-9]*\s*\(.*/g;
-// let regexFuncDeclFirst = /^\s*(int|void)\s*/g;
-// let regexFuncDeclLast = /\s*\(.*/g;
-// let regexIdents = /^[a-zA-Z_][a-zA-Z_0-9]*$/g;
 
 export class SysYNumberHover implements vscode.HoverProvider {
     public async provideHover(
@@ -50,7 +42,7 @@ export class SysYIdentHover implements vscode.HoverProvider {
         this.identsArrayCorLineNum = [];
         this.identsArrayLv = [];
         // console.log(wholeLine);
-        this.findAllConstDecls(document);
+        this.findAllConstDecls();
         let kk = null;
         let io = this.identsArray.indexOf(hoveredWord);
         if (io != -1) {
@@ -77,8 +69,8 @@ export class SysYIdentHover implements vscode.HoverProvider {
         };
     };
 
-    findAllConstDecls(document: vscode.TextDocument): number | null{ 
-        var vardefs = ast.getAstModel(document.getText());
+    findAllConstDecls(){ 
+        var vardefs = ast.getAstModel();
 
         vardefs.then(
             res => {
@@ -92,8 +84,6 @@ export class SysYIdentHover implements vscode.HoverProvider {
                 
             }
         )
-
-        return null;
     };
 }
 
