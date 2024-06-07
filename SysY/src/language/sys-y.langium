@@ -22,16 +22,16 @@ ConstDef:
     idents=Ident ('[' const_exp+=ConstExp ']')* '=' const_init_val=ConstInitVal;
 
 ConstInitVal:
-    const_exp+=ConstExp | ('{' ( const_init_val+=ConstInitVal ( ',' const_init_val+=ConstInitVal )* )? '}');
+    const_exp=ConstExp | ('{' ( const_init_val+=ConstInitVal ( ',' const_init_val+=ConstInitVal )* )? '}');
 
 VarDecl:
     'int' var_def+=VarDef ( ',' var_def+=VarDef )* ';';
 
 VarDef:
-    (idents=Ident ('[' const_exp+=ConstExp ']')*) | (idents=Ident ('[' const_exp+=ConstExp ']')* '=' init_val+=InitVal);
+    (idents=Ident ('[' const_exp+=ConstExp ']')*) | (idents=Ident ('[' const_exp+=ConstExp ']')* '=' init_val=InitVal);
 
 InitVal:
-    exps+=Exp | ('{'  (init_vals+=InitVal  (',' init_vals+=InitVal)* )?  '}');
+    exps=Exp | ('{'  (init_vals+=InitVal  (',' init_vals+=InitVal)* )?  '}');
 
 FuncFParams:
     funcfp+=FuncFParam (',' funcfp+=FuncFParam)*;
@@ -70,46 +70,46 @@ PrimaryExp infers Exp:
     numint=INT | '(' exps+=Exp ')' | lv+=LVal;
 
 UnaryExp infers Exp:
-    pexp+=PrimaryExp | (idents+=Ident '(' (funrps+=FuncRParams)? ')') | (('+' | '-' | '!') uexp+=UnaryExp);
+    exps+=PrimaryExp | (idents+=Ident '(' (funrps+=FuncRParams)? ')') | (('+' | '-' | '!') exps+=UnaryExp);
 
 FuncRParams:
     exps+=Exp ( ',' exps+=Exp )*;
 
 MulExp infers Exp:
-    uexp+=UnaryExp mexp+=_MulExp;
+    exps+=UnaryExp exps+=_MulExp;
 
 _MulExp infers Exp:
-    (('*' | '/' | '%') uexp+=UnaryExp)*;
+    (('*' | '/' | '%') exps+=UnaryExp)*;
 
 AddExp infers Exp:
-    mexp+=MulExp aexp+=_AddExp;
+    exps+=MulExp exps+=_AddExp;
 
 _AddExp infers Exp:
-    (('+' | '-')  mexp+=MulExp)*;
+    (('+' | '-')  exps+=MulExp)*;
 
 RelExp infers Exp:
-    aexp+=AddExp rexp+=_RelExp;
+    exps+=AddExp exps+=_RelExp;
 
 _RelExp infers Exp:
-    (('<' | '>' | '<=' | '>=') aexp+=AddExp)*;
+    (('<' | '>' | '<=' | '>=') exps+=AddExp)*;
 
 EqExp infers Exp:
-    rexp+=RelExp eexp+=_EqExp;
+    exps+=RelExp exps+=_EqExp;
 
 _EqExp infers Exp:
-    (('==' | '!=') rexp+=RelExp)*;
+    (('==' | '!=') exps+=RelExp)*;
 
 LAndExp infers Exp:
-    eexp+=EqExp laexp+=_LAndExp;
+    exps+=EqExp exps+=_LAndExp;
 
 _LAndExp infers Exp:
-    ('&&' eexp+=EqExp)*;
+    ('&&' exps+=EqExp)*;
 
 LOrExp infers Exp:
-    laexp+=LAndExp loexp+=_LOrExp;
+    exps+=LAndExp exps+=_LOrExp;
 
 _LOrExp infers Exp:
-    ('||' laexp+=LAndExp)*;
+    ('||' exps+=LAndExp)*;
 
 ConstExp infers Exp:
     exps+=AddExp;

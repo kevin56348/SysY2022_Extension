@@ -1,9 +1,8 @@
 import type { AstNode, ValidationAcceptor, ValidationChecks } from 'langium';
 import { SysYAstType, isModel, Exp, ConstDecl, VarDecl, LVal, VarDef, ConstDef } from './generated/ast.js';
 import type { SysYServices } from './sys-y-module.js';
-// import * as vscode from 'vscode';
 import {IdentTable} from '../utils/IdentTable.js'
-import { creatIdentTable } from "../utils/lex.js";
+// import { creatIdentTable } from "../utils/lex.js";
 
 /**
  * Register custom validation checks.
@@ -28,8 +27,8 @@ export function registerValidationChecks(services: SysYServices) {
 export class SysYValidator {
 
     // IdentsTable = new Set();
-    // IdentsTable = new IdentTable();
-    identsTable = creatIdentTable();
+    IdentsTable = new IdentTable();
+    // identsTable = creatIdentTable();
     // disposable = vscode.commands.registerCommand('extension.showCurrentLineNumber', () => {
     //     const editor = vscode.window.activeTextEditor;
     //     if (editor) {
@@ -41,11 +40,14 @@ export class SysYValidator {
     FuncTable = new IdentTable();
 
     checkMyIdent(model: AstNode, accept: ValidationAcceptor): void {
+
         if (!isModel(model)) {
             throw new Error('');
         }
         
         // const myIdents = new Set();
+        this.IdentsTable = new IdentTable();
+        this.FuncTable = new IdentTable();
         model.decls.forEach(de => {
             if (de.decls_spc.$type == "ConstDecl") {
                 (de.decls_spc as ConstDecl).const_def.forEach(d => {
