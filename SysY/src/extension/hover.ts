@@ -1,9 +1,9 @@
 import * as vscode from 'vscode';
 import * as ast from "../language/ASTTest.js"
-
+// import { Ident } from '../language/generated/ast.js';
 
 let regexDec = /^-?[0-9]+$/g;
-let regexConstDecl = /^\s*const\s*int\s*/g;
+// let regexConstDecl = /^\s*const\s*int\s*/g;
 
 export class SysYNumberHover implements vscode.HoverProvider {
     public async provideHover(
@@ -27,43 +27,30 @@ export class SysYNumberHover implements vscode.HoverProvider {
 
 export class SysYIdentHover implements vscode.HoverProvider {
 
-    identsArray: Array<string> = [];
-    identsArrayCorLineNum: Array<number> = [];
-    identsArrayLv: Array<number> = [];
+    decls: Array<ast.DefsInside> = [];
 
     public async provideHover(
         document: vscode.TextDocument,
         position: vscode.Position
     ) {
         let hoveredWord = document.getText(document.getWordRangeAtPosition(position));
-        let wholeLine = document.lineAt(position.line).text;
         let markdownString = new vscode.MarkdownString();
-        this.identsArray = [];
-        this.identsArrayCorLineNum = [];
-        this.identsArrayLv = [];
+        this.decls = [];
         // console.log(wholeLine);
         this.findAllConstDecls();
-        let kk = null;
-        let io = this.identsArray.indexOf(hoveredWord);
-        if (io != -1) {
-            console.log("Found at: " + this.identsArrayCorLineNum[io]);
-            kk = this.identsArrayCorLineNum[io];
-        }
-        if (kk) {
-            markdownString.appendCodeblock(`I am a happy identifier:${hoveredWord} in line ${position.line}\n Def: ${document.lineAt(kk as number).text}\n At Line: ${kk}`, 'sys-y');
-        } else {
-            // not found
-            markdownString.appendCodeblock(`I am a longly identifier:${hoveredWord} in line ${position.line}\n ${wholeLine}`, 'sys-y');
-        }
-        if (regexConstDecl.test(wholeLine)) {
 
-            // let input: Number = Number(hoveredWord.toString());
-            console.log(wholeLine);
-            return {
-                contents: [markdownString]
-            };
-        } 
-        // markdownString.appendCodeblock('', 'sys-y');
+        this.decls.forEach(decl => {
+            if (decl.ident == hoveredWord) {
+                console.log("Found at: " + decl.pos);
+            }
+            markdownString.appendCodeblock(`I am a happy identifier:${hoveredWord} in line ${position.line}\n Def: ${document.lineAt(decl.pos.line).text}\n At Line: ${decl.pos.line}`, 'sys-y');
+        
+        });
+        markdownString.appendCodeblock(`I amSSS a happy identifier:${hoveredWord} in line ${position.line}\n Def: `, 'sys-y');
+
+        // not found
+        // markdownString.appendCodeblock(`I am a longly identifier:${hoveredWord} in line ${position.line}\n ${wholeLine}`, 'sys-y');
+
         return {
             contents: [markdownString]
         };
@@ -77,9 +64,7 @@ export class SysYIdentHover implements vscode.HoverProvider {
                 // console.log(res);
                 res.forEach(r => {
                     console.log(r);
-                    this.identsArray.push(r[0]);
-                    this.identsArrayCorLineNum.push(r[1].line);
-                    this.identsArrayLv.push(r[2]);
+                    this.decls = res;
                 });
                 
             }
