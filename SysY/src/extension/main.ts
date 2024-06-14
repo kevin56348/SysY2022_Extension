@@ -3,9 +3,8 @@ import * as vscode from 'vscode';
 import * as path from 'node:path';
 import { LanguageClient, TransportKind } from 'vscode-languageclient/node.js';
 import { SysYNumberHover, SysYIdentHover } from "./hover.js"
-import { mymyProvider } from "./refactor.js"
+import { FunctionExtractionProvider, extractFunctionCommand, reverseBooleanCommand, BooleanReverseProvider} from "./refactor.js"
 
-export type TriggeredFrom = 'onSave' | 'onCommand' | 'codeAction';
 
 let client: LanguageClient;
 
@@ -29,50 +28,34 @@ export function activate(context: vscode.ExtensionContext): void {
 		)
     );
 
-    const sortCommand = vscode.commands.registerTextEditorCommand(
-        'refactor.extract.function',
-        sortImportsByCommand,
-      );
-    const beforeSave = vscode.workspace.onWillSaveTextDocument(sortImportsBeforeSavingDocument);
-    
     context.subscriptions.push(
-        sortCommand,
-        beforeSave,
-        vscode.languages.registerCodeActionsProvider("sys-y", new mymyProvider(), {
-          providedCodeActionKinds: mymyProvider.ACTION_KINDS,
-        }),
-      );
-
-    client = startLanguageClient(context);
+        vscode.commands.registerTextEditorCommand(
+            'refactor.extract.function',
+            extractFunctionCommand,
+        ),
+        vscode.commands.registerTextEditorCommand(
+            'refactor.reverse.boolean',
+            reverseBooleanCommand,
+        ),
+        vscode.languages.registerCodeActionsProvider(
+            "sys-y",
+            new FunctionExtractionProvider(), 
+            {
+                providedCodeActionKinds: FunctionExtractionProvider.ACTION_KINDS,
+            }
+        ),
+        vscode.languages.registerCodeActionsProvider(
+            "sys-y",
+            new BooleanReverseProvider(),
+            {
+                providedCodeActionKinds: BooleanReverseProvider.ACTION_KINDS,
+            }
+        ),
+    );
     
+    client = startLanguageClient(context);
 }
-function sortImportsBeforeSavingDocument(event: vscode.TextDocumentWillSaveEvent) {
-    const { document } = event;
-    const format = async () => {
-    //   const newSourceText = await formatDocument(document, 'onSave');
-    //   if (newSourceText === undefined) return [];
-      return [vscode.TextEdit.replace(fullRange(document), document.getText())];
-    };
-    event.waitUntil(format());
-}
-  
-async function sortImportsByCommand(editor: vscode.TextEditor, _: vscode.TextEditorEdit, from?: TriggeredFrom) {
-    if (!editor) {
-        return;
-    }
-    const { document } = editor;
-    if (!document) {
-        return;
-    }
-    void editor.edit(edit => edit.replace(fullRange(document), "Hello"));
-  }
 
-function fullRange(document: vscode.TextDocument) {
-    const lastLine = document.lineCount - 1;
-    const lastCharacter = document.lineAt(lastLine).text.length;
-    return new vscode.Range(0, 0, lastLine, lastCharacter);
-}
-  
 // This function is called when the extension is deactivated.
 export function deactivate(): Thenable<void> | undefined {
     if (client) {

@@ -3,7 +3,7 @@ import * as ast from "../language/ASTTest.js"
 // import { Ident } from '../language/generated/ast.js';
 
 let regexDec = /^-?[0-9]+$/g;
-// let regexConstDecl = /^\s*const\s*int\s*/g;
+// let regexConstDecl = /^\s*const\s+int\s*/g;
 
 export class SysYNumberHover implements vscode.HoverProvider {
     public async provideHover(
