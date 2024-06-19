@@ -48,11 +48,11 @@ export class SysYIdentHover implements vscode.HoverProvider {
             }
         });
         if (ranges.length == 1) {
-            markdownString.appendMarkdown(`I am a **WELL-DEFINED** identifier:${hoveredWord} in line ${position.line}\n Def: `);
+            markdownString.appendMarkdown(`I am a **WELL-DEFINED** identifier:${hoveredWord} in line ${position.line + 1}\n Def: `);
             markdownString.appendCodeblock(`${document.lineAt(ranges[0].pos.line).text}`, 'sys-y');
-            markdownString.appendMarkdown(`At Line: ${ranges[0].pos.line}`);
+            markdownString.appendMarkdown(`At Line: ${ranges[0].pos.line + 1}`);
         } else if (ranges.length == 0) {
-            markdownString.appendMarkdown(`I am a **UNDEFINED** identifier:${hoveredWord} in line ${position.line}`);
+            markdownString.appendMarkdown(`I am a **UNDEFINED** identifier:${hoveredWord} in line ${position.line + 1}`);
         } else {
             var closest: ast.DefsInside = ranges[0];
             ranges.forEach(r => {
@@ -60,9 +60,9 @@ export class SysYIdentHover implements vscode.HoverProvider {
                     closest = r;
                 }
             });
-            markdownString.appendMarkdown(`I am a **MULTI-DEFINED** identifier:${hoveredWord} in line ${position.line}\n Def: `);
+            markdownString.appendMarkdown(`I am a **MULTI-DEFINED** identifier:${hoveredWord} in line ${position.line + 1}\n Def: `);
             markdownString.appendCodeblock(`${document.lineAt(closest.pos.line).text}`, 'sys-y');
-            markdownString.appendMarkdown(`At Line: ${closest.pos.line}`);
+            markdownString.appendMarkdown(`At Line: ${closest.pos.line + 1}`);
         }
 
         return {
