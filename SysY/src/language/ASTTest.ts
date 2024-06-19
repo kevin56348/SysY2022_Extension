@@ -4,7 +4,7 @@ import { EmptyFileSystem } from "langium";
 import {createSysYServices} from "./sys-y-module.js"
 import { Position, Range } from "vscode";
 import * as vscode from "vscode";
-import { CompletionItemLabelDetails } from "vscode-languageclient";
+// import { CompletionItemLabelDetails } from "vscode-languageclient";
 
 export interface DefsInside {
     ident: string;
