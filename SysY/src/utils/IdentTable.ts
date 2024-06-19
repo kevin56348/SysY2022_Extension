@@ -1,11 +1,11 @@
+import { Position, Range } from "vscode";
+
 interface Node {
     name: string; // ident name
-    line_num: number; // line number
+    position: Position; // line number
     level: number; //hierarchy
     func_name: string; // in which function
-    ident_type: string; //int / void / int1 / int2(array)
-    param_num:
-    number; //func param num 
+    range: Range; // vaild range
 }
 
 export class IdentTable {
@@ -15,26 +15,55 @@ export class IdentTable {
         this.nodes = [];
     }
 
-    add(name: string, line_num: number, level: number, func_name: string, ident_type: string = 'int', param_num:number = 0) {
-        this.nodes.push({ name, line_num, level, func_name, ident_type, param_num });
+    add(name: string, position: Position, level: number, func_name: string, range: Range) {
+        this.nodes.push({ name, position, level, func_name, range });
+    }
+
+    add_arr(arr: [string, Position, number, string, Range]) {
+        this.nodes.push({
+            name: arr[0], 
+            position: arr[1], 
+            level: arr[2], 
+            func_name: arr[3], 
+            range: arr[4]
+        });
+    }
+
+    add_arrs(arrs: Promise<[string, Position, number, string, Range][]>): Node[] {
+        this.clear();
+        arrs.then(
+            res => {
+                res.forEach(arr=>{
+                    this.nodes.push({
+                        name: arr[0], 
+                        position: arr[1], 
+                        level: arr[2], 
+                        func_name: arr[3], 
+                        range: arr[4]
+                    });
+                });
+                
+            }
+        )
+        return this.nodes;
     }
 
     clear(){
         this.nodes = [];
     }
 
-    // match(name: string, line_num: number, level: number, func_name: string): boolean {
-    //     return this.nodes.some(node => 
-    //         node.name === name && node.line_num <= line_num 
-    //             && ((node.func_name === func_name && node.level <= level) 
-    //                 || (node.level === 0))
-    //     );
-    // }
-
-    match(name: string, func_name: string): boolean {
+    match(testnode:Node){
         return this.nodes.some(node => 
-            node.name === name 
-                && (node.func_name === func_name || func_name === 'global')
+            node.name === testnode.name 
+            && node.position.isBefore(testnode.position)
+            && node.level <= testnode.level
+            && (node.func_name == testnode.func_name || testnode.func_name == '')
+            && node.range.start.isBefore(testnode.range.start)
+            && node.range.end.isAfter(testnode.range.end)
         );
+    }
+
+    getnode():Node[]{
+        return this.nodes;
     }
 }

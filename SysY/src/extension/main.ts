@@ -3,12 +3,16 @@ import * as vscode from 'vscode';
 import * as path from 'node:path';
 import { LanguageClient, TransportKind } from 'vscode-languageclient/node.js';
 import { SysYNumberHover, SysYIdentHover } from "./hover.js"
-
+import { IdentDiagnostic } from "./diagnostic.js"
 
 let client: LanguageClient;
+let identdiagnostic: IdentDiagnostic;
 
 // This function is called when the extension is activated.
 export function activate(context: vscode.ExtensionContext): void {
+   
+    identdiagnostic = new IdentDiagnostic();
+
     context.subscriptions.push(
 		vscode.languages.registerHoverProvider(
 		  [
@@ -27,6 +31,38 @@ export function activate(context: vscode.ExtensionContext): void {
 		)
     );
 
+
+    if (vscode.window.activeTextEditor) {
+      console.log("~~~activeTextEditor");
+      identdiagnostic.updateDiagnostics(vscode.window.activeTextEditor.document);
+  }
+
+    context.subscriptions.push(
+      vscode.workspace.onDidChangeTextDocument(event => {
+        if (vscode.window.activeTextEditor && event.document === vscode.window.activeTextEditor.document) {
+            console.log("~~~onDidChangeTextDocument");
+            identdiagnostic.updateDiagnostics(event.document);
+        }
+      })
+    )
+
+    context.subscriptions.push(
+      vscode.workspace.onDidCloseTextDocument(doc => {
+        console.log("~~~onDidCloseTextDocument");
+        identdiagnostic.clearDiagnostics(doc)
+      })
+  );
+
+    context.subscriptions.push(
+      vscode.window.onDidChangeActiveTextEditor(editor =>{
+        if (editor){
+          console.log("~~~onDidChangeActiveTextEditor");
+          identdiagnostic.updateDiagnostics(editor.document);
+        }
+      })
+    )
+
+    console.log("~~~~~~~~~~~~main-65");
     client = startLanguageClient(context);
     
 }

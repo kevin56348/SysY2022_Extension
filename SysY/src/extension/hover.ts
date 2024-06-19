@@ -43,6 +43,7 @@ export class SysYIdentHover implements vscode.HoverProvider {
         this.identsArrayLv = [];
         // console.log(wholeLine);
         this.findAllConstDecls();
+        this.findAllIdents();
         let kk = null;
         let io = this.identsArray.indexOf(hoveredWord);
         if (io != -1) {
@@ -80,6 +81,24 @@ export class SysYIdentHover implements vscode.HoverProvider {
                     this.identsArray.push(r[0]);
                     this.identsArrayCorLineNum.push(r[1].line);
                     this.identsArrayLv.push(r[2]);
+                });
+                
+            }
+        )
+    };
+
+    findAllIdents(){ 
+        var varidents = ast.getAstModel_Ident();
+
+        varidents.then(
+            res => {
+                // console.log(res);
+                res.forEach(r => {
+                    console.log("~~~~idents: ");
+                    console.log(r);
+                    // this.identsArray.push(r[0]);
+                    // this.identsArrayCorLineNum.push(r[1].line);
+                    // this.identsArrayLv.push(r[2]);
                 });
                 
             }
