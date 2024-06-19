@@ -219,7 +219,7 @@ export async function renameIdentCommand(editor: TextEditor, _: TextEditorEdit, 
     console.log(targetTable);
 
     if(!targetTable.isempty()){
-        console.log("return");
+        window.showErrorMessage("Selected item is not an identer.");
         return;
     }
     else{
