@@ -133,7 +133,7 @@ hidden terminal WS returns string: /\s+/;
 terminal ID returns string: /[_a-zA-Z][_a-zA-Z0-9]*[\w_]*/;
 terminal OCTINT returns number: /[+-]?[0][0-7]+/;
 terminal HEXINT returns number: /[+-]?[0][xX][0-9a-fA-F]+/;
-terminal FLOAT returns number: /[+-]?[1-9][0-9]*[\.]?[0-9]*|[+-]?[0-9][\.]?[0-9]*/;
+terminal FLOAT returns number: /[+-]?[1-9][0-9]*[\.][0-9]*|[+-]?[0-9][\.][0-9]*/;
 terminal INT returns number: /[+-]?[1-9][0-9]*|[+-]?[0-9]/;
 terminal STRING returns string: /"(\\.|[^"\\])*"/;
 

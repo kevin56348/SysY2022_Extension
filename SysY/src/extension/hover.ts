@@ -1,8 +1,11 @@
 import * as vscode from 'vscode';
 import * as ast from "../language/ASTTest.js"
+// import { toString } from 'langium/generate';
 // import { Ident } from '../language/generated/ast.js';
 
 let regexDec = /^-?[0-9]+$/g;
+let regexHex = /[+-]?[0][xX][0-9a-fA-F]+/g;
+let regexOct = /[+-]?[0][0-7]+/g;
 
 // let regexConstDecl = /^\s*const\s+int\s*/g;
 
@@ -13,8 +16,20 @@ export class SysYNumberHover implements vscode.HoverProvider {
     ) {
         let hoveredWord = document.getText(document.getWordRangeAtPosition(position));
         let markdownString = new vscode.MarkdownString();
-        if (regexDec.test(hoveredWord.toString())) {
-            let input: Number = Number(hoveredWord.toString());
+        if (regexHex.test(hoveredWord.toString())) {
+            let input: Number = Number(parseInt(hoveredWord.toString(), 16));
+            markdownString.appendCodeblock(`Hex:\n0x${input.toString(16).toUpperCase()}\n\Binary:\n0b${input.toString(2).replace(/(^\s+|\s+$)/, '')}\nOctal:\n0${input.toString(8)}\nDecimal:\n0${input.toString(10)} `, 'sys-y');
+            return {
+                contents: [markdownString]
+            };
+        } else if (regexOct.test(hoveredWord.toString())) {
+            let input: Number = Number(parseInt(hoveredWord.toString(), 8));
+            markdownString.appendCodeblock(`Hex:\n0x${input.toString(16).toUpperCase()}\n\Binary:\n0b${input.toString(2).replace(/(^\s+|\s+$)/, '')}\nOctal:\n0${input.toString(8)}\nDecimal:\n0${input.toString(10)} `, 'sys-y');
+            return {
+                contents: [markdownString]
+            };
+        } else if (regexDec.test(hoveredWord.toString())) {
+            let input: Number = Number(parseInt(hoveredWord.toString(), 10));
             markdownString.appendCodeblock(`Hex:\n0x${input.toString(16).toUpperCase()}\n\Binary:\n0b${input.toString(2).replace(/(^\s+|\s+$)/, '')}\nOctal:\n0${input.toString(8)}\nDecimal:\n0${input.toString(10)} `, 'sys-y');
             return {
                 contents: [markdownString]
