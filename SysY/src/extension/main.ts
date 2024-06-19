@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import * as path from 'node:path';
 import { LanguageClient, TransportKind } from 'vscode-languageclient/node.js';
 import { SysYNumberHover, SysYIdentHover } from "./hover.js"
-import { FunctionExtractionProvider, extractFunctionCommand, reverseBooleanCommand, BooleanReverseProvider} from "./refactor.js"
+import { FunctionExtractionProvider, extractFunctionCommand, reverseBooleanCommand, BooleanReverseProvider, renameIdentCommand, IdentRenameProvider} from "./refactor.js"
 import { IdentDiagnostic } from "./diagnostic.js"
 import { QuickFix } from './quickfix.js';
 
@@ -38,6 +38,10 @@ export function activate(context: vscode.ExtensionContext): void {
             'refactor.reverse.boolean',
             reverseBooleanCommand,
         ),
+        vscode.commands.registerTextEditorCommand(
+            'refactor.rename.ident',
+            renameIdentCommand,
+        ),
         vscode.languages.registerCodeActionsProvider(
             "sys-y",
             new FunctionExtractionProvider(), 
@@ -50,6 +54,13 @@ export function activate(context: vscode.ExtensionContext): void {
             new BooleanReverseProvider(),
             {
                 providedCodeActionKinds: BooleanReverseProvider.ACTION_KINDS,
+            }
+        ),
+        vscode.languages.registerCodeActionsProvider(
+            "sys-y",
+            new IdentRenameProvider(),
+            {
+                providedCodeActionKinds: IdentRenameProvider.ACTION_KINDS,
             }
         ),
         vscode.workspace.onDidChangeTextDocument(event => {
@@ -70,17 +81,18 @@ export function activate(context: vscode.ExtensionContext): void {
         }),
         
 
+      );
+
+      context.subscriptions.push(
+        vscode.languages.registerCodeActionsProvider(
+            [{ language: 'sys-y', scheme: '*' }],
+            new QuickFix(),
+            {
+                providedCodeActionKinds: QuickFix.providedCodeActionKinds
+            }
+        )
     );
 
-    context.subscriptions.push(
-      vscode.languages.registerCodeActionsProvider(
-          [{ language: 'sys-y', scheme: '*' }],
-          new QuickFix(),
-          {
-              providedCodeActionKinds: QuickFix.providedCodeActionKinds
-          }
-      )
-  );
 
     client = startLanguageClient(context);
 }

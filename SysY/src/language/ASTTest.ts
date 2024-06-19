@@ -33,7 +33,7 @@ export async function getAstModel() : Promise<DefsInside[]>{
 
     const model = document.parseResult.value;
 
-    console.log(model);
+    //console.log(model);
 
     const finddef = new Defs;
 
@@ -59,7 +59,7 @@ export async function getAstModel_Ident() : Promise<[string, Position, number, s
 
     const model = document.parseResult.value;
 
-    //console.log(model);
+    ////console.log(model);
 
     const finddef = new Idents;
 
@@ -74,7 +74,7 @@ export class Defs {
 
     getAllDefs(model: Model) {
         this.vardefs = [];
-        // console.log("Entering getFuncDefs");
+        // //console.log("Entering getFuncDefs");
         if (!model) {
             return this.vardefs;
         }
@@ -85,11 +85,11 @@ export class Defs {
     
     
         if (decl_len == 0) {
-            // console.log("NO decls");
+            // //console.log("NO decls");
             return this.vardefs;
         }
     
-        // console.log("Found decls");
+        // //console.log("Found decls");
     
         var lv: number = 0;
         // global
@@ -102,7 +102,7 @@ export class Defs {
         //             fps.funcfp.forEach(f => {
         //                 fpts.push(f.vartype.mytype.toString());
         //             });
-        //             // console.log(fpts);
+        //             // //console.log(fpts);
         //             var di = <DefsInside>{
         //                 ident: func.func.toString(),
         //                 pos: new Position(func.$cstNode?.range.start.line, func.$cstNode?.range.start.character),
@@ -130,14 +130,14 @@ export class Defs {
         // });
     
         decls.forEach(declspc => {
-            // //console.log(declspc);
+            // ////console.log(declspc);
             if (declspc.decls_spc.$type == ConstDecl) {
-                // console.log("Found a const decl:");
+                // //console.log("Found a const decl:");
                 const declnames = declspc.decls_spc.const_def;
                 declnames.forEach(decl => {
-                    // console.log("Ident: %s", decl.idents.name);
+                    // //console.log("Ident: %s", decl.idents.name);
                     if (decl.idents.$cstNode?.range) {
-                        // console.log(decl.idents.$cstNode?.range);
+                        // //console.log(decl.idents.$cstNode?.range);
                         if (model.$cstNode?.range) {
                             var di = <DefsInside>{
                                 ident: decl.idents.name,
@@ -155,17 +155,17 @@ export class Defs {
                     if (initial_vals.const_exp) {
                         const calc_val = this.expcalc.calc(initial_vals.const_exp);
                         calc_val.forEach(val => {
-                            // console.log("calced a val of %s : %d", decl.idents.name, val);
+                            // //console.log("calced a val of %s : %d", decl.idents.name, val);
                         });
                     }
                 });
             } else if (declspc.decls_spc.$type == VarDecl) {
-                // console.log("Found a var decl:");
+                // //console.log("Found a var decl:");
                 const declnames = declspc.decls_spc.var_def;
                 declnames.forEach(decl => {
-                    // console.log("Ident: %s", decl.idents.name);
+                    // //console.log("Ident: %s", decl.idents.name);
                     if (decl.idents.$cstNode?.range) {
-                        // console.log(decl.idents.$cstNode?.range);
+                        // //console.log(decl.idents.$cstNode?.range);
                         if (model.$cstNode?.range) {
                             var di = <DefsInside>{
                                 ident: decl.idents.name,
@@ -183,7 +183,7 @@ export class Defs {
                     if (initial_vals?.exps) {
                         const calc_val = this.expcalc.calc(initial_vals.exps);
                         calc_val.forEach(val => {
-                            // console.log("calced a val of %s : %d", decl.idents.name, val);
+                            // //console.log("calced a val of %s : %d", decl.idents.name, val);
                         });
                     }
                 });
@@ -204,7 +204,7 @@ export class Defs {
                 });
 
                 funcdef.funcfps.funcfp.forEach(fp => {
-                    // console.log(fp.ident.name);
+                    // //console.log(fp.ident.name);
                     if (fp.ident.$cstNode?.range) {
                         var di = <DefsInside>{
                             ident: fp.ident.name,
@@ -231,7 +231,7 @@ export class Defs {
                         unused: false
                     };
                     this.vardefs.push(di);
-                    console.log("Added func: ", funcdef.func, " whose params are ", fps);
+                    //console.log("Added func: ", funcdef.func, " whose params are ", fps);
                 }
             }
 
@@ -283,12 +283,12 @@ export class Defs {
         blks.bis.forEach(fp => {
             if (fp.decls) {
                 if (fp.decls.decls_spc.$type == ConstDecl){
-                    // console.log("Found a const decl:");
+                    // //console.log("Found a const decl:");
                     const declnames = fp.decls.decls_spc.const_def;
                     declnames.forEach(decl => {
-                        // console.log("Ident: %s", decl.idents.name);
+                        // //console.log("Ident: %s", decl.idents.name);
                         if (decl.idents.$cstNode?.range) {
-                            // console.log(decl.idents.$cstNode?.range);
+                            // //console.log(decl.idents.$cstNode?.range);
                             if(blks.$cstNode?.range){
                                 var di = <DefsInside>{
                                     ident: decl.idents.name,
@@ -306,17 +306,17 @@ export class Defs {
                         if (initial_vals.const_exp) {
                             const calc_val = this.expcalc.calc(initial_vals.const_exp);
                             calc_val.forEach(val => {
-                                // console.log("calced a val of %s : %d", decl.idents.name, val);
+                                // //console.log("calced a val of %s : %d", decl.idents.name, val);
                             });
                         }
                     });
                 }else if (fp.decls.decls_spc.$type == VarDecl) {
-                    // console.log("Found a var decl:");
+                    // //console.log("Found a var decl:");
                     const declnames = fp.decls.decls_spc.var_def;
                     declnames.forEach(decl => {
-                        // console.log("Ident: %s", decl.idents.name);
+                        // //console.log("Ident: %s", decl.idents.name);
                         if (decl.idents.$cstNode?.range) {
-                            // console.log(decl.idents.$cstNode?.range);
+                            // //console.log(decl.idents.$cstNode?.range);
                             if (blks.$cstNode?.range) {
                                 var di = <DefsInside>{
                                     ident: decl.idents.name,
@@ -335,7 +335,7 @@ export class Defs {
                         if (initial_vals?.exps) {
                             const calc_val = this.expcalc.calc(initial_vals.exps);
                             calc_val.forEach(val => {
-                                // console.log("calced a val of %s : %d", decl.idents.name, val);
+                                // //console.log("calced a val of %s : %d", decl.idents.name, val);
                             });
                         }
                     });
@@ -387,13 +387,13 @@ export class Idents {
     getAllIdents(model: Model) {
 
         if (model.mainfuncdef) {
-            console.log("ok");
+            //console.log("ok");
         } else {
             console.warn("Main Func DOES NOT EXIST!");
         }
 
         this.vardefs = [];
-        //console.log("Entering getFuncDefs");
+        ////console.log("Entering getFuncDefs");
     
         const decls = model.decls;
     
@@ -402,7 +402,7 @@ export class Idents {
     
         decls.forEach(declspc => {
             if (declspc.decls_spc.$type == ConstDecl) {
-                //console.log("Found a const decl:");
+                ////console.log("Found a const decl:");
                 const declnames = declspc.decls_spc.const_def;
                 declnames.forEach(decl => {
                     var const_exps = decl.const_exp;
@@ -422,7 +422,7 @@ export class Idents {
                     }
                 });
             } else if (declspc.decls_spc.$type == VarDecl) {
-                //console.log("Found a var decl:");
+                ////console.log("Found a var decl:");
                 const declnames = declspc.decls_spc.var_def;
                 declnames.forEach(decl => {
                     var const_exps = decl.const_exp;
@@ -508,7 +508,7 @@ export class Idents {
         }
         if (stmt.lv){
             if (stmt.lv.idents.$cstNode?.range) {
-                //console.log(stmt.lv.idents.$cstNode?.range);
+                ////console.log(stmt.lv.idents.$cstNode?.range);
                 if (stmt.$cstNode?.range){
                     this.vardefs.push([
                         stmt.lv.idents.name,
@@ -526,7 +526,7 @@ export class Idents {
         if (stmt.conds) {
             // ONLY ONE EXP EXISTS IN COND
             // console.warn(stmt.conds.exps.length);
-            console.log(this.expcalc.calc(stmt.conds.exps[0]));
+            //console.log(this.expcalc.calc(stmt.conds.exps[0]));
             this.traverse_exp(stmt.conds.exps[0], lv, func, is_unused);
         }
     }
@@ -535,7 +535,7 @@ export class Idents {
         blks.bis.forEach(fp => {
             if (fp.decls) {
                 if (fp.decls.decls_spc.$type == ConstDecl){
-                    //console.log("Found a const decl:");
+                    ////console.log("Found a const decl:");
                     const declnames = fp.decls.decls_spc.const_def;
                     declnames.forEach(decl => {
                         var const_exps = decl.const_exp;
@@ -555,7 +555,7 @@ export class Idents {
                         }
                     });
                 }else if (fp.decls.decls_spc.$type == VarDecl) {
-                    //console.log("Found a var decl:");
+                    ////console.log("Found a var decl:");
                     const declnames = fp.decls.decls_spc.var_def;
                     declnames.forEach(decl => {
                         var const_exps = decl.const_exp;
@@ -597,9 +597,9 @@ export class Idents {
         }
         if (exps.lv){
             exps.lv.forEach(elv => {
-                //console.log("Ident: %s", elv.idents.name);
+                ////console.log("Ident: %s", elv.idents.name);
                 if (elv.idents.$cstNode?.range) {
-                    //console.log(elv.idents.$cstNode?.range);
+                    ////console.log(elv.idents.$cstNode?.range);
                     if (exps.$cstNode?.range){
                         this.vardefs.push([
                             elv.idents.name,
@@ -619,7 +619,7 @@ export class Idents {
         if (exps.idents) {
             // func call
             if (exps.idents.$cstNode?.range) {
-                // console.log(exps.idents.name);
+                // //console.log(exps.idents.name);
                 if (exps.$cstNode?.range) {
                     const rps = exps.funrps;
 
@@ -639,7 +639,7 @@ export class Idents {
                         rpss,
                         is_unused
                     ]);
-                    // console.log(exps.idents.name, rpss);
+                    // //console.log(exps.idents.name, rpss);
                 }
             }
         }
