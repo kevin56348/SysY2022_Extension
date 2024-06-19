@@ -10,7 +10,7 @@ interface Node {
 }
 
 export class IdentTable {
-    private nodes: Node[];
+    public nodes: Node[];
 
     constructor() {
         this.nodes = [];
@@ -30,42 +30,31 @@ export class IdentTable {
         });
     }
 
-    add_arrs(arrs: Promise<[string, Position, number, string, Range][]>): Node[] {
+    add_arrs(arrs: [string, Position, number, string, Range][]): Node[] {
         this.clear();
-        arrs.then(
-            res => {
-                res.forEach(arr=>{
-                    this.nodes.push({
-                        name: arr[0], 
-                        position: arr[1], 
-                        level: arr[2], 
-                        func_name: arr[3], 
-                        range: arr[4]
-                    });
-                });
-                
-            }
-        )
+        arrs.forEach(arr=>{
+            this.nodes.push({
+                name: arr[0], 
+                position: arr[1], 
+                level: arr[2], 
+                func_name: arr[3], 
+                range: arr[4]
+            });
+        });
         return this.nodes;
     }
 
-    add_arrs_DI(arrs: Promise<DefsInside[]>): Node[] {
+    add_arrs_DI(arrs: DefsInside[]) {
         this.clear();
-        arrs.then(
-            res => {
-                res.forEach(di=>{
-                    this.nodes.push({
-                        name: di.ident, 
-                        position: di.pos, 
-                        level: di.lv, 
-                        func_name: di.belong_to, 
-                        range: di.range
-                    });
-                });
-                
-            }
-        )
-        return this.nodes;
+        arrs.forEach(di=>{
+            this.nodes.push({
+                name: di.ident, 
+                position: di.pos, 
+                level: di.lv, 
+                func_name: di.belong_to, 
+                range: di.range
+            });
+        });
     }
 
     clear(){

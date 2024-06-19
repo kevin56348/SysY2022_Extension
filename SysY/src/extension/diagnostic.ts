@@ -1,6 +1,3 @@
-// TODO:
-// IdentTable初始化/赋值之后为Array(0),再次调用才为正常Array(length)
-// 关闭工作区，错误信息不能清除
 import * as vscode from 'vscode';
 import * as ast from "../language/ASTTest.js"
 import { IdentTable } from "../utils/IdentTable.js";
@@ -15,18 +12,14 @@ export class IdentDiagnostic {
         this.diagnostics = vscode.languages.createDiagnosticCollection('sys-y');
         this.declsTable = new IdentTable();
         this.varsTable = new IdentTable();
-
-        this.findAllConstDecls();
-        this.findAllIdents();
     }
 
-    public updateDiagnostics(
+    public async updateDiagnostics(
         document: vscode.TextDocument
-    ){
-        console.log("~~~~~~~~diagnostic-23");
-        // this.diagnostics = vscode.languages.createDiagnosticCollection('sys-y');
-        // this.findAllConstDecls();
-        // this.findAllIdents();
+    ) {
+        this.diagnostics.clear();
+        await this.findAllConstDecls();
+        await this.findAllIdents();
 
         const diagnosticsArray: vscode.Diagnostic[] = [];
 
@@ -43,7 +36,6 @@ export class IdentDiagnostic {
         });
 
         this.diagnostics.set(document.uri, diagnosticsArray);
-        console.log("~~~~~~~~diagnostic-43");
         console.log(this.declsTable);
         console.log(this.varsTable);
         console.log(diagnosticsArray);
@@ -55,40 +47,16 @@ export class IdentDiagnostic {
         this.diagnostics.delete(document.uri);
     }
 
-    public updateTable(){
-        this.findAllConstDecls();
-        this.findAllIdents();
-    }
-
-    findAllConstDecls(){ 
-        var vardefs = ast.getAstModel();
-
+    async findAllConstDecls(){ 
+        const vardefs = await ast.getAstModel();
         this.declsTable.add_arrs_DI(vardefs);
-        // vardefs.then(
-        //     res => {
-        //         // console.log(res);
-        //         res.forEach(r => {
-        //             this.declsTable.add_arr(r);
-        //         });
-                
-        //     }
-        // )
+        console.warn(this.declsTable.nodes)
     }
 
-    findAllIdents(){ 
-        var varidents = ast.getAstModel_Ident();
+    async findAllIdents(){ 
+        const varidents = await ast.getAstModel_Ident();
         let tmp = this.varsTable.add_arrs(varidents);
         console.log(tmp);
-        // this.varsTable.add_arrs(varidents);
-        // varidents.then(
-        //     res => {
-        //         // console.log(res);
-        //         res.forEach(r => {
-        //             this.varsTable.add_arr(r);
-        //         });
-                
-        //     }
-        // )
     }
 
 }

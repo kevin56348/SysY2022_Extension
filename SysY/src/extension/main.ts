@@ -11,28 +11,27 @@ let identdiagnostic: IdentDiagnostic;
 
 // This function is called when the extension is activated.
 export function activate(context: vscode.ExtensionContext): void {
-   
+
     identdiagnostic = new IdentDiagnostic();
 
-    context.subscriptions.push(
-		vscode.languages.registerHoverProvider(
-		  [
-			{ language: 'sys-y', scheme: '*' }
-		  ],
-		  new SysYNumberHover()
-		)
-    );
+    if (vscode.window.activeTextEditor) {
+        // console.log("~~~activeTextEditor");
+        identdiagnostic.updateDiagnostics(vscode.window.activeTextEditor.document);
+    }
 
     context.subscriptions.push(
 		vscode.languages.registerHoverProvider(
-		  [
-			{ language: 'sys-y', scheme: '*' }
-		  ],
-		  new SysYIdentHover()
-		)
-    );
-
-    context.subscriptions.push(
+            [
+                { language: 'sys-y', scheme: '*' }
+            ],
+            new SysYNumberHover()
+        ),
+        vscode.languages.registerHoverProvider(
+            [
+                { language: 'sys-y', scheme: '*' }
+            ],
+            new SysYIdentHover()
+        ),
         vscode.commands.registerTextEditorCommand(
             'refactor.extract.function',
             extractFunctionCommand,
@@ -55,40 +54,25 @@ export function activate(context: vscode.ExtensionContext): void {
                 providedCodeActionKinds: BooleanReverseProvider.ACTION_KINDS,
             }
         ),
+        vscode.workspace.onDidChangeTextDocument(event => {
+            if (vscode.window.activeTextEditor && event.document === vscode.window.activeTextEditor.document) {
+                // console.log("~~~onDidChangeTextDocument");
+                identdiagnostic.updateDiagnostics(event.document);
+            }
+        }),
+        vscode.workspace.onDidCloseTextDocument(doc => {
+            // console.log("~~~onDidCloseTextDocument");
+            identdiagnostic.clearDiagnostics(doc);
+        }),
+        vscode.window.onDidChangeActiveTextEditor(editor =>{
+            if (editor){
+            // console.log("~~~onDidChangeActiveTextEditor");
+            identdiagnostic.updateDiagnostics(editor.document);
+            }
+        })
+
     );
-    
 
-    if (vscode.window.activeTextEditor) {
-      console.log("~~~activeTextEditor");
-      identdiagnostic.updateDiagnostics(vscode.window.activeTextEditor.document);
-  }
-
-    context.subscriptions.push(
-      vscode.workspace.onDidChangeTextDocument(event => {
-        if (vscode.window.activeTextEditor && event.document === vscode.window.activeTextEditor.document) {
-            console.log("~~~onDidChangeTextDocument");
-            identdiagnostic.updateDiagnostics(event.document);
-        }
-      })
-    )
-
-    context.subscriptions.push(
-      vscode.workspace.onDidCloseTextDocument(doc => {
-        console.log("~~~onDidCloseTextDocument");
-        identdiagnostic.clearDiagnostics(doc)
-      })
-  );
-
-    context.subscriptions.push(
-      vscode.window.onDidChangeActiveTextEditor(editor =>{
-        if (editor){
-          console.log("~~~onDidChangeActiveTextEditor");
-          identdiagnostic.updateDiagnostics(editor.document);
-        }
-      })
-    )
-
-    console.log("~~~~~~~~~~~~main-65");
     client = startLanguageClient(context);
 }
 
