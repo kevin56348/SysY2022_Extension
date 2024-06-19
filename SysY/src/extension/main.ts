@@ -17,19 +17,16 @@ export function activate(context: vscode.ExtensionContext): void {
     if (vscode.window.activeTextEditor) {
         // console.log("~~~activeTextEditor");
         identdiagnostic.updateDiagnostics(vscode.window.activeTextEditor.document);
+	
     }
 
     context.subscriptions.push(
 		vscode.languages.registerHoverProvider(
-            [
-                { language: 'sys-y', scheme: '*' }
-            ],
+            'sys-y',
             new SysYNumberHover()
         ),
         vscode.languages.registerHoverProvider(
-            [
-                { language: 'sys-y', scheme: '*' }
-            ],
+            'sys-y',
             new SysYIdentHover()
         ),
         vscode.commands.registerTextEditorCommand(
@@ -69,7 +66,8 @@ export function activate(context: vscode.ExtensionContext): void {
             // console.log("~~~onDidChangeActiveTextEditor");
             identdiagnostic.updateDiagnostics(editor.document);
             }
-        })
+        }),
+        
 
     );
 
