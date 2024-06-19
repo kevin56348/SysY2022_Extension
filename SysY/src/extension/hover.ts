@@ -52,6 +52,7 @@ export class SysYIdentHover implements vscode.HoverProvider {
             markdownString.appendCodeblock(`${document.lineAt(ranges[0].pos.line).text}`, 'sys-y');
             markdownString.appendMarkdown(`At Line: ${ranges[0].pos.line + 1}`);
         } else if (ranges.length == 0) {
+            if(hoveredWord.charAt(0) >= 'a' && hoveredWord.charAt(0) <= 'z' || hoveredWord.charAt(0) >= 'A' && hoveredWord.charAt(0) <= 'Z' || hoveredWord.charAt(0) == '_')
             markdownString.appendMarkdown(`I am a **UNDEFINED** identifier:${hoveredWord} in line ${position.line + 1}`);
         } else {
             var closest: ast.DefsInside = ranges[0];
