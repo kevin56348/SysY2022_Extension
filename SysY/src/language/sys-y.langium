@@ -7,16 +7,16 @@ Decl:
     decls_spc=(ConstDecl | VarDecl);
 
 FuncDef:
-    ('void' | 'int') func=ID '(' (funcfps=FuncFParams)? ')' blks=Block;
+    ('void' | 'int' | 'float') func=ID '(' (funcfps=FuncFParams)? ')' blks=Block;
 
 MainFuncDef:
-    'int' 'main' '(' ')' blks=Block;
+    ('int' | 'float') 'main' '(' ')' blks=Block;
 
 Ident:
     name=ID;
 
 ConstDecl:
-    'const' 'int' const_def+=ConstDef (',' const_def+=ConstDef)* ';';
+    'const' ('int' | 'float') const_def+=ConstDef (',' const_def+=ConstDef)* ';';
 
 ConstDef:
     idents=Ident ('[' const_exp+=ConstExp ']')* '=' const_init_val=ConstInitVal;
@@ -25,7 +25,7 @@ ConstInitVal:
     const_exp=ConstExp | ('{' ( const_init_val+=ConstInitVal ( ',' const_init_val+=ConstInitVal )* )? '}');
 
 VarDecl:
-    'int' var_def+=VarDef ( ',' var_def+=VarDef )* ';';
+    ('int' | 'float') var_def+=VarDef ( ',' var_def+=VarDef )* ';';
 
 VarDef:
     (idents=Ident ('[' const_exp+=ConstExp ']')*) | (idents=Ident ('[' const_exp+=ConstExp ']')* '=' init_val=InitVal);
@@ -37,7 +37,7 @@ FuncFParams:
     funcfp+=FuncFParam (',' funcfp+=FuncFParam)*;
 
 FuncFParam:
-    'int' ident=Ident ('[' ']'  ('[' const_exp+=ConstExp ']')* )?;
+    ('int' | 'float') ident=Ident ('[' ']'  ('[' const_exp+=ConstExp ']')* )?;
 
 Block:
     '{' ( bis+=BlockItem )* '}';
@@ -67,7 +67,7 @@ LVal:
     idents=Ident ('[' exps+=Exp ']')*;
 
 PrimaryExp infers Exp:
-    numint=INT | '(' exps+=Exp ')' | lv+=LVal;
+    numhexint=HEXINT | numoctint=OCTINT | numfloat=FLOAT | numint=INT | '(' exps+=Exp ')' | lv+=LVal;
 
 UnaryExp infers Exp:
     exps+=PrimaryExp | (idents+=Ident '(' (funrps+=FuncRParams)? ')') | (('+' | '-' | '!') exps+=UnaryExp);
@@ -116,6 +116,9 @@ ConstExp infers Exp:
 
 hidden terminal WS returns string: /\s+/;
 terminal ID returns string: /[_a-zA-Z][_a-zA-Z0-9]*[\w_]*/;
+terminal OCTINT returns number: /[+-]?[0][0-7]+/;
+terminal HEXINT returns number: /[+-]?[0][xX][0-9a-fA-F]+/;
+terminal FLOAT returns number: /[+-]?[1-9][0-9]*[\.]?[0-9]*|[+-]?[0-9][\.]?[0-9]*/;
 terminal INT returns number: /[+-]?[1-9][0-9]*|[+-]?[0-9]/;
 terminal STRING returns string: /"(\\.|[^"\\])*"/;
 
