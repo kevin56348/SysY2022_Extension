@@ -41,7 +41,7 @@ export class IdentDiagnostic {
             if (node.unused) {
                 if (node.unused as boolean) {
                     const diagnostic = new vscode.Diagnostic(
-                        new vscode.Range(new vscode.Position(node.position.line, 0), new vscode.Position(node.position.line, node.position.character + node.name.length + 200)),
+                        new vscode.Range(node.position, new vscode.Position(node.position.line, node.position.character + node.name.length)),
                         'dead code.',
                         vscode.DiagnosticSeverity.Information
                     );
