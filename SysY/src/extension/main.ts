@@ -5,6 +5,7 @@ import { LanguageClient, TransportKind } from 'vscode-languageclient/node.js';
 import { SysYNumberHover, SysYIdentHover } from "./hover.js"
 import { FunctionExtractionProvider, extractFunctionCommand, reverseBooleanCommand, BooleanReverseProvider} from "./refactor.js"
 import { IdentDiagnostic } from "./diagnostic.js"
+import { QuickFix } from './quickfix.js';
 
 let client: LanguageClient;
 let identdiagnostic: IdentDiagnostic;
@@ -17,19 +18,16 @@ export function activate(context: vscode.ExtensionContext): void {
     if (vscode.window.activeTextEditor) {
         // console.log("~~~activeTextEditor");
         identdiagnostic.updateDiagnostics(vscode.window.activeTextEditor.document);
+	
     }
 
     context.subscriptions.push(
 		vscode.languages.registerHoverProvider(
-            [
-                { language: 'sys-y', scheme: '*' }
-            ],
+            'sys-y',
             new SysYNumberHover()
         ),
         vscode.languages.registerHoverProvider(
-            [
-                { language: 'sys-y', scheme: '*' }
-            ],
+            'sys-y',
             new SysYIdentHover()
         ),
         vscode.commands.registerTextEditorCommand(
@@ -69,9 +67,20 @@ export function activate(context: vscode.ExtensionContext): void {
             // console.log("~~~onDidChangeActiveTextEditor");
             identdiagnostic.updateDiagnostics(editor.document);
             }
-        })
+        }),
+        
 
     );
+
+    context.subscriptions.push(
+      vscode.languages.registerCodeActionsProvider(
+          [{ language: 'sys-y', scheme: '*' }],
+          new QuickFix(),
+          {
+              providedCodeActionKinds: QuickFix.providedCodeActionKinds
+          }
+      )
+  );
 
     client = startLanguageClient(context);
 }
