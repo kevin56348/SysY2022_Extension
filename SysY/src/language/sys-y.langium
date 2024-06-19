@@ -3,20 +3,26 @@ grammar SysY
 entry Model:
     (decls+=Decl)* (funcdefs+=FuncDef)* mainfuncdef=MainFuncDef;
 
+FuncType:
+    mytype=('void' | 'int' | 'float');
+
+BType:
+    mytype=('int' | 'float');
+
 Decl:
     decls_spc=(ConstDecl | VarDecl);
 
 FuncDef:
-    ('void' | 'int' | 'float') func=ID '(' (funcfps=FuncFParams)? ')' blks=Block;
+    functype=FuncType func=ID '(' (funcfps=FuncFParams)? ')' blks=Block;
 
 MainFuncDef:
-    ('int' | 'float') 'main' '(' ')' blks=Block;
+    'int' 'main' '(' ')' blks=Block;
 
 Ident:
     name=ID;
 
 ConstDecl:
-    'const' ('int' | 'float') const_def+=ConstDef (',' const_def+=ConstDef)* ';';
+    'const' vartype=BType const_def+=ConstDef (',' const_def+=ConstDef)* ';';
 
 ConstDef:
     idents=Ident ('[' const_exp+=ConstExp ']')* '=' const_init_val=ConstInitVal;
@@ -25,7 +31,7 @@ ConstInitVal:
     const_exp=ConstExp | ('{' ( const_init_val+=ConstInitVal ( ',' const_init_val+=ConstInitVal )* )? '}');
 
 VarDecl:
-    ('int' | 'float') var_def+=VarDef ( ',' var_def+=VarDef )* ';';
+    vartype=BType var_def+=VarDef ( ',' var_def+=VarDef )* ';';
 
 VarDef:
     (idents=Ident ('[' const_exp+=ConstExp ']')*) | (idents=Ident ('[' const_exp+=ConstExp ']')* '=' init_val=InitVal);
@@ -37,7 +43,7 @@ FuncFParams:
     funcfp+=FuncFParam (',' funcfp+=FuncFParam)*;
 
 FuncFParam:
-    ('int' | 'float') ident=Ident ('[' ']'  ('[' const_exp+=ConstExp ']')* )?;
+    vartype=BType ident=Ident ('[' ']'  ('[' const_exp+=ConstExp ']')* )?;
 
 Block:
     '{' ( bis+=BlockItem )* '}';
@@ -70,7 +76,7 @@ PrimaryExp infers Exp:
     numhexint=HEXINT | numoctint=OCTINT | numfloat=FLOAT | numint=INT | '(' exps+=Exp ')' | lv+=LVal;
 
 UnaryExp infers Exp:
-    exps+=PrimaryExp | (idents+=Ident '(' (funrps+=FuncRParams)? ')') | (('+' | '-' | '!') exps+=UnaryExp);
+    exps+=PrimaryExp | (idents=Ident '(' (funrps=FuncRParams)? ')') | (('+' | '-' | '!') exps+=UnaryExp);
 
 FuncRParams:
     exps+=Exp ( ',' exps+=Exp )*;

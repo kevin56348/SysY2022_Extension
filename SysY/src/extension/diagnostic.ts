@@ -32,12 +32,22 @@ export class IdentDiagnostic {
                     vscode.DiagnosticSeverity.Error
                 );
                 diagnosticsArray.push(diagnostic);
+            } else {
+                if (!this.declsTable.ps_match(node)) {
+                    const diagnostic = new vscode.Diagnostic(
+                        new vscode.Range(node.position, new vscode.Position(node.position.line, node.position.character + node.name.length)),
+                        node.name + ' FuncParams do not match',
+                        vscode.DiagnosticSeverity.Error
+                    );
+                    diagnosticsArray.push(diagnostic);
+                }
+                
             }
         });
 
         this.declsTable.getnode().forEach(node => {
             let shadow_line = this.declsTable.isshadow(node);
-            console.log("~~~", node.name, node.range, shadow_line);
+            // console.log("~~~", node.name, node.range, shadow_line);
             if (shadow_line != -1){
                 const diagnostic = new vscode.Diagnostic(
                     new vscode.Range(node.position, new vscode.Position(node.position.line, node.position.character + node.name.length)),
@@ -48,11 +58,10 @@ export class IdentDiagnostic {
             }
         });
 
-
         this.diagnostics.set(document.uri, diagnosticsArray);
-        console.log(this.declsTable);
-        console.log(this.varsTable);
-        console.log(diagnosticsArray);
+        // console.log(this.declsTable);
+        // console.log(this.varsTable);
+        // console.log(diagnosticsArray);
     }
 
     public clearDiagnostics(
@@ -69,8 +78,8 @@ export class IdentDiagnostic {
 
     async findAllIdents(){ 
         const varidents = await ast.getAstModel_Ident();
-        let tmp = this.varsTable.add_arrs(varidents);
-        console.log(tmp);
+        this.varsTable.add_arrs(varidents);
+        // console.log(tmp);
     }
 
 }

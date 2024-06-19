@@ -1,5 +1,5 @@
 import { parseHelper } from "langium/test";
-import { Block, ConstDecl, Exp, Model, Stmt, VarDecl, ConstInitVal, InitVal } from "../language/generated/ast.js";
+import { Block, ConstDecl, Exp, Model, Stmt, VarDecl, ConstInitVal, InitVal, Decl } from "../language/generated/ast.js";
 import { EmptyFileSystem } from "langium";
 import {createSysYServices} from "./sys-y-module.js"
 import { Position, Range } from "vscode";
@@ -12,6 +12,8 @@ export interface DefsInside {
     lv: number;
     belong_to: string;
     range: Range;
+    type?: string;
+    funcfparam?: string[];
 }
 
 export async function getAstModel() : Promise<DefsInside[]>{
@@ -39,10 +41,10 @@ export async function getAstModel() : Promise<DefsInside[]>{
     return vardefs;
 }
 
-export async function getAstModel_Ident() : Promise<[string, Position, number, string, Range][]>{
+export async function getAstModel_Ident() : Promise<[string, Position, number, string, Range, string, string[] | undefined][]>{
     const services = createSysYServices(EmptyFileSystem);
     const parse = parseHelper<Model>(services.SysY);
-    var varidents: Array<[string, Position, number, string, Range]> = [];
+    var varidents: Array<[string, Position, number, string, Range, string, string[] | undefined]> = [];
     const td = vscode.window.activeTextEditor?.document;
     var doc: string = "";
 
@@ -77,6 +79,7 @@ export class Defs {
     
         const decls = model.decls;
         const decl_len = decls.length;
+        // const funcd = model.funcdefs;
     
     
         if (decl_len == 0) {
@@ -88,6 +91,41 @@ export class Defs {
     
         var lv: number = 0;
         // global
+
+        // funcd.forEach(func => { 
+        //     if (func.$cstNode?.range) {
+        //         const fps = func.funcfps;
+        //         if (fps) {
+        //             var fpts: string[] = [];
+        //             fps.funcfp.forEach(f => {
+        //                 fpts.push(f.vartype.mytype.toString());
+        //             });
+        //             // console.log(fpts);
+        //             var di = <DefsInside>{
+        //                 ident: func.func.toString(),
+        //                 pos: new Position(func.$cstNode?.range.start.line, func.$cstNode?.range.start.character),
+        //                 lv: lv,
+        //                 belong_to: "",
+        //                 range: new Range(func.$cstNode.range.start as Position, model.$cstNode?.range.end as Position),
+        //                 type: func.functype.mytype.toString(),
+        //                 funcfparam: fpts
+        //             };
+        //             this.vardefs.push(di);
+        //         } else {
+        //             var di = <DefsInside>{
+        //                 ident: func.func.toString(),
+        //                 pos: new Position(func.$cstNode?.range.start.line, func.$cstNode?.range.start.character),
+        //                 lv: lv,
+        //                 belong_to: "",
+        //                 range: new Range(func.$cstNode.range.start as Position, model.$cstNode?.range.end as Position),
+        //                 type: func.functype.mytype.toString(),
+        //                 funcfparam: ["void"]
+        //             };
+        //             this.vardefs.push(di);
+        //         }
+
+        //     }
+        // });
     
         decls.forEach(declspc => {
             // //console.log(declspc);
@@ -104,7 +142,8 @@ export class Defs {
                                 pos: new Position(decl.idents.$cstNode.range.start.line, decl.idents.$cstNode.range.start.character),
                                 lv: lv,
                                 belong_to: "",
-                                range: new Range(decl.idents.$cstNode.range.start as Position, model.$cstNode?.range.end as Position)
+                                range: new Range(decl.idents.$cstNode.range.start as Position, model.$cstNode?.range.end as Position),
+                                type: declspc.decls_spc.vartype.mytype.toString()
                             };
                             this.vardefs.push(di);
                         }
@@ -130,7 +169,8 @@ export class Defs {
                                 pos: new Position(decl.idents.$cstNode.range.start.line, decl.idents.$cstNode.range.start.character),
                                 lv: lv,
                                 belong_to: "",
-                                range: new Range(decl.idents.$cstNode.range.start as Position, model.$cstNode?.range.end as Position)
+                                range: new Range(decl.idents.$cstNode.range.start as Position, model.$cstNode?.range.end as Position),
+                                type: declspc.decls_spc.vartype.mytype.toString()
                             };
                             this.vardefs.push(di);
                         }
@@ -154,19 +194,39 @@ export class Defs {
         funcdefs.forEach(funcdef => {
             if (funcdef.funcfps) {
                 // add params into defs
+                var fps: string[] = [];
+                funcdef.funcfps.funcfp.forEach(f => {
+                    fps.push(f.vartype.mytype.toString());
+                });
+
                 funcdef.funcfps.funcfp.forEach(fp => {
                     // console.log(fp.ident.name);
                     if (fp.ident.$cstNode?.range) {
                         var di = <DefsInside>{
                             ident: fp.ident.name,
                             pos: new Position(fp.ident.$cstNode.range.start.line, fp.ident.$cstNode.range.start.character),
-                            lv: lv,
+                            lv: 1,
                             belong_to: funcdef.func,
-                            range: new Range(fp.ident.$cstNode.range.start as Position, funcdef.$cstNode?.range.end as Position)
+                            range: new Range(fp.ident.$cstNode.range.start as Position, funcdef.$cstNode?.range.end as Position),
+                            type: fp.vartype.mytype,
                         };
                         this.vardefs.push(di);
                     }
                 });
+
+                if(funcdef.$cstNode?.range){
+                    var di = <DefsInside>{
+                        ident: funcdef.func,
+                        pos: new Position(funcdef.$cstNode.range.start.line, funcdef.$cstNode.range.start.character),
+                        lv: 0,
+                        belong_to: "",
+                        range: new Range(funcdef.$cstNode.range.start as Position, model.$cstNode?.range.end as Position),
+                        type: funcdef.functype.mytype,
+                        funcfparam: fps
+                    };
+                    this.vardefs.push(di);
+                    console.log("Added func: ", funcdef.func, " whose params are ", fps);
+                }
             }
 
             if (funcdef.blks) {
@@ -221,9 +281,10 @@ export class Defs {
                                     pos: new Position(decl.idents.$cstNode.range.start.line, decl.idents.$cstNode.range.start.character),
                                     lv: lv,
                                     belong_to: func,
-                                    range: new Range(decl.idents.$cstNode.range.start as Position, blks.$cstNode?.range.end as Position)
+                                    range: new Range(decl.idents.$cstNode.range.start as Position, blks.$cstNode?.range.end as Position),
+                                    type: (fp.decls as Decl).decls_spc.vartype.mytype.toString()
                                 };
-                                this.vardefs.push(di);;
+                                this.vardefs.push(di);
                             }
                         }
                         var initial_vals = decl.const_init_val;
@@ -247,7 +308,8 @@ export class Defs {
                                     pos: new Position(decl.idents.$cstNode.range.start.line, decl.idents.$cstNode.range.start.character),
                                     lv: lv,
                                     belong_to: func,
-                                    range: new Range(decl.idents.$cstNode.range.start as Position, blks.$cstNode?.range.end as Position)
+                                    range: new Range(decl.idents.$cstNode.range.start as Position, blks.$cstNode?.range.end as Position),
+                                    type: (fp.decls as Decl).decls_spc.vartype.mytype.toString()
                                 };
                                 this.vardefs.push(di);
                                     
@@ -301,7 +363,7 @@ class ExpCalc{
 
 export class Idents {
     expcalc = new ExpCalc;
-    vardefs: Array<[string, Position, number, string, Range]> = [];
+    vardefs: Array<[string, Position, number, string, Range, string, string[] | undefined]> = [];
 
     getAllIdents(model: Model) {
 
@@ -429,8 +491,15 @@ export class Idents {
             if (stmt.lv.idents.$cstNode?.range) {
                 //console.log(stmt.lv.idents.$cstNode?.range);
                 if (stmt.$cstNode?.range){
-                    this.vardefs.push([stmt.lv.idents.name, new Position(stmt.lv.idents.$cstNode.range.start.line, stmt.lv.idents.$cstNode.range.start.character), lv, func,
-                        new Range(stmt.lv.idents.$cstNode.range.start as Position, stmt.$cstNode?.range.end as Position)]);
+                    this.vardefs.push([
+                        stmt.lv.idents.name,
+                        new Position(stmt.lv.idents.$cstNode.range.start.line, stmt.lv.idents.$cstNode.range.start.character),
+                        lv,
+                        func,
+                        new Range(stmt.lv.idents.$cstNode.range.start as Position, stmt.$cstNode?.range.end as Position),
+                        "void",
+                        undefined
+                    ]);
                 }
             }
         }
@@ -503,12 +572,47 @@ export class Idents {
                 if (elv.idents.$cstNode?.range) {
                     //console.log(elv.idents.$cstNode?.range);
                     if (exps.$cstNode?.range){
-                        this.vardefs.push([elv.idents.name, new Position(elv.idents.$cstNode.range.start.line, elv.idents.$cstNode.range.start.character), lv, func,
-                            new Range(elv.idents.$cstNode.range.start as Position, exps.$cstNode?.range.end as Position)]);
+                        this.vardefs.push([
+                            elv.idents.name,
+                            new Position(elv.idents.$cstNode.range.start.line, elv.idents.$cstNode.range.start.character),
+                            lv,
+                            func,
+                            new Range(elv.idents.$cstNode.range.start as Position, exps.$cstNode?.range.end as Position),
+                            "void",
+                            undefined
+                        ]);
                     }
                 }
             });
+        } 
+
+        if (exps.idents) {
+            // func call
+            if (exps.idents.$cstNode?.range) {
+                // console.log(exps.idents.name);
+                if (exps.$cstNode?.range) {
+                    const rps = exps.funrps;
+
+                    var rpss: string[] = [];
+                    if(rps){
+                        rps.exps.forEach(rp => {
+                            rpss.push("x");
+                        });
+                    }
+                    this.vardefs.push([
+                        exps.idents.name,
+                        new Position(exps.idents.$cstNode.range.start.line, exps.idents.$cstNode.range.start.character),
+                        lv,
+                        func,
+                        new Range(exps.idents.$cstNode.range.start as Position, exps.$cstNode?.range.end as Position),
+                        "func",
+                        rpss
+                    ]);
+                    // console.log(exps.idents.name, rpss);
+                }
+            }
         }
+
     }
 
     traverse_const_init_val (const_init_vals: ConstInitVal, lv: number, func: string) {
