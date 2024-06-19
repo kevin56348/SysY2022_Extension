@@ -1,4 +1,5 @@
 import { Position, Range } from "vscode";
+import { DefsInside } from "../language/ASTTest.js";
 
 interface Node {
     name: string; // ident name
@@ -40,6 +41,25 @@ export class IdentTable {
                         level: arr[2], 
                         func_name: arr[3], 
                         range: arr[4]
+                    });
+                });
+                
+            }
+        )
+        return this.nodes;
+    }
+
+    add_arrs_DI(arrs: Promise<DefsInside[]>): Node[] {
+        this.clear();
+        arrs.then(
+            res => {
+                res.forEach(di=>{
+                    this.nodes.push({
+                        name: di.ident, 
+                        position: di.pos, 
+                        level: di.lv, 
+                        func_name: di.belong_to, 
+                        range: di.range
                     });
                 });
                 

@@ -63,7 +63,7 @@ export class IdentDiagnostic {
     findAllConstDecls(){ 
         var vardefs = ast.getAstModel();
 
-        this.declsTable.add_arrs(vardefs);
+        this.declsTable.add_arrs_DI(vardefs);
         // vardefs.then(
         //     res => {
         //         // console.log(res);
