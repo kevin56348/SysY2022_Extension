@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 import * as path from 'node:path';
 import { LanguageClient, TransportKind } from 'vscode-languageclient/node.js';
 import { SysYNumberHover, SysYIdentHover } from "./hover.js"
+import { FunctionExtractionProvider, extractFunctionCommand, reverseBooleanCommand, BooleanReverseProvider} from "./refactor.js"
 import { IdentDiagnostic } from "./diagnostic.js"
 
 let client: LanguageClient;
@@ -31,6 +32,31 @@ export function activate(context: vscode.ExtensionContext): void {
 		)
     );
 
+    context.subscriptions.push(
+        vscode.commands.registerTextEditorCommand(
+            'refactor.extract.function',
+            extractFunctionCommand,
+        ),
+        vscode.commands.registerTextEditorCommand(
+            'refactor.reverse.boolean',
+            reverseBooleanCommand,
+        ),
+        vscode.languages.registerCodeActionsProvider(
+            "sys-y",
+            new FunctionExtractionProvider(), 
+            {
+                providedCodeActionKinds: FunctionExtractionProvider.ACTION_KINDS,
+            }
+        ),
+        vscode.languages.registerCodeActionsProvider(
+            "sys-y",
+            new BooleanReverseProvider(),
+            {
+                providedCodeActionKinds: BooleanReverseProvider.ACTION_KINDS,
+            }
+        ),
+    );
+    
 
     if (vscode.window.activeTextEditor) {
       console.log("~~~activeTextEditor");
@@ -64,7 +90,6 @@ export function activate(context: vscode.ExtensionContext): void {
 
     console.log("~~~~~~~~~~~~main-65");
     client = startLanguageClient(context);
-    
 }
 
 // This function is called when the extension is deactivated.

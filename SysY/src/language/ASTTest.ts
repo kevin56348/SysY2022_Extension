@@ -5,7 +5,15 @@ import {createSysYServices} from "./sys-y-module.js"
 import { Position, Range } from "vscode";
 import * as vscode from "vscode";
 
-export async function getAstModel() : Promise<[string, Position, number, string, Range][]>{
+export interface DefsInside {
+    ident: string;
+    pos: Position;
+    lv: number;
+    belong_to: string;
+    range: Range;
+}
+
+export async function getAstModel() : Promise<DefsInside[]>{
     const services = createSysYServices(EmptyFileSystem);
     const parse = parseHelper<Model>(services.SysY);
 
@@ -26,7 +34,7 @@ export async function getAstModel() : Promise<[string, Position, number, string,
 
     const finddef = new Defs;
 
-    var vardefs: Array<[string, Position, number, string, Range]>;
+    var vardefs: Array<DefsInside>;
 
     vardefs = finddef.getAllDefs(model);
 
@@ -63,11 +71,11 @@ export async function getAstModel_Ident() : Promise<[string, Position, number, s
 
 export class Defs {
     expcalc = new ExpCalc;
-    vardefs: Array<[string, Position, number, string, Range]> = [];
+    vardefs: Array<DefsInside> = [];
 
     getAllDefs(model: Model) {
         this.vardefs = [];
-        //console.log("Entering getFuncDefs");
+        // console.log("Entering getFuncDefs");
         if (!model) {
             return this.vardefs;
         }
@@ -78,11 +86,11 @@ export class Defs {
         // //console.log(decl_len);
     
         if (decl_len == 0) {
-            //console.log("NO decls");
+            // console.log("NO decls");
             return this.vardefs;
         }
     
-        //console.log("Found decls");
+        // console.log("Found decls");
     
         var lv: number = 0;
         // global
@@ -90,56 +98,68 @@ export class Defs {
         decls.forEach(declspc => {
             // //console.log(declspc);
             if (declspc.decls_spc.$type == ConstDecl) {
-                //console.log("Found a const decl:");
+                // console.log("Found a const decl:");
                 const declnames = declspc.decls_spc.const_def;
                 declnames.forEach(decl => {
-                    //console.log("Ident: %s", decl.idents.name);
+                    // console.log("Ident: %s", decl.idents.name);
                     if (decl.idents.$cstNode?.range) {
-                        //console.log(decl.idents.$cstNode?.range);
-                        if(model.$cstNode?.range){
-                            this.vardefs.push([decl.idents.name, new Position(decl.idents.$cstNode.range.start.line, decl.idents.$cstNode.range.start.character), lv, "", 
-                                new Range(decl.idents.$cstNode.range.start as Position, model.$cstNode?.range.end as Position)])
-                                // //console.log("%s begins at line: %d, character: %d; ends at line: %d, character: %d",
-                                //     decl.idents.name,
-                                //     decl.idents.$cstNode.range.start.line,
-                                //     decl.idents.$cstNode.range.start.character,
-                                //     model.$cstNode?.range.end.line,
-                                //     model.$cstNode?.range.end.character
-                                // );
+                        // console.log(decl.idents.$cstNode?.range);
+                        if (model.$cstNode?.range) {
+                            var di = <DefsInside>{
+                                ident: decl.idents.name,
+                                pos: new Position(decl.idents.$cstNode.range.start.line, decl.idents.$cstNode.range.start.character),
+                                lv: lv,
+                                belong_to: "",
+                                range: new Range(decl.idents.$cstNode.range.start as Position, model.$cstNode?.range.end as Position)
+                            };
+                            this.vardefs.push(di);
+                            // console.log("%s begins at line: %d, character: %d; ends at line: %d, character: %d",
+                            //     di.ident,
+                            //     di.range.start.line,
+                            //     di.range.start.character,
+                            //     di.range.end.line,
+                            //     di.range.end.character,
+                            // );
                         }
                     }
                     var initial_vals = decl.const_init_val;
                     if (initial_vals.const_exp) {
                         const calc_val = this.expcalc.calc(initial_vals.const_exp);
                         calc_val.forEach(val => {
-                            //console.log("calced a val of %s : %d", decl.idents.name, val);
+                            // console.log("calced a val of %s : %d", decl.idents.name, val);
                         });
                     }
                 });
             } else if (declspc.decls_spc.$type == VarDecl) {
-                //console.log("Found a var decl:");
+                // console.log("Found a var decl:");
                 const declnames = declspc.decls_spc.var_def;
                 declnames.forEach(decl => {
-                    //console.log("Ident: %s", decl.idents.name);
+                    // console.log("Ident: %s", decl.idents.name);
                     if (decl.idents.$cstNode?.range) {
-                        //console.log(decl.idents.$cstNode?.range);
+                        // console.log(decl.idents.$cstNode?.range);
                         if (model.$cstNode?.range) {
-                            this.vardefs.push([decl.idents.name, new Position(decl.idents.$cstNode.range.start.line, decl.idents.$cstNode.range.start.character), lv, "",
-                                new Range(decl.idents.$cstNode.range.start as Position, model.$cstNode?.range.end as Position)])
-                                // //console.log("%s begins at line: %d, character: %d; ends at line: %d, character: %d",
-                                //     decl.idents.name,
-                                //     decl.idents.$cstNode.range.start.line,
-                                //     decl.idents.$cstNode.range.start.character,
-                                //     model.$cstNode?.range.end.line,
-                                //     model.$cstNode?.range.end.character
-                                // );
+                            var di = <DefsInside>{
+                                ident: decl.idents.name,
+                                pos: new Position(decl.idents.$cstNode.range.start.line, decl.idents.$cstNode.range.start.character),
+                                lv: lv,
+                                belong_to: "",
+                                range: new Range(decl.idents.$cstNode.range.start as Position, model.$cstNode?.range.end as Position)
+                            };
+                            this.vardefs.push(di);
+                            // console.log("%s begins at line: %d, character: %d; ends at line: %d, character: %d",
+                            //     di.ident,
+                            //     di.range.start.line,
+                            //     di.range.start.character,
+                            //     di.range.end.line,
+                            //     di.range.end.character,
+                            // );
                         }
                     }
                     var initial_vals = decl.init_val;
                     if (initial_vals?.exps) {
                         const calc_val = this.expcalc.calc(initial_vals.exps);
                         calc_val.forEach(val => {
-                            //console.log("calced a val of %s : %d", decl.idents.name, val);
+                            // console.log("calced a val of %s : %d", decl.idents.name, val);
                         });
                     }
                 });
@@ -155,19 +175,25 @@ export class Defs {
             if (funcdef.funcfps) {
                 // add params into defs
                 funcdef.funcfps.funcfp.forEach(fp => {
-                    //console.log(fp.ident.name);
+                    // console.log(fp.ident.name);
                     if (fp.ident.$cstNode?.range) {
-                        //console.log(fp.ident.$cstNode?.range);
-                        //console.log(funcdef.func);
-                        this.vardefs.push([fp.ident.name, new Position(fp.ident.$cstNode.range.start.line, fp.ident.$cstNode.range.start.character), lv, funcdef.func,
-                            new Range(fp.ident.$cstNode.range.start as Position, funcdef.$cstNode?.range.end as Position)])
-                            // //console.log("%s begins at line: %d, character: %d; ends at line: %d, character: %d",
-                            //     fp.ident.name,
-                            //     fp.ident.$cstNode.range.start.line,
-                            //     fp.ident.$cstNode.range.start.character,
-                            //     funcdef.$cstNode?.range.end.line,
-                            //     funcdef.$cstNode?.range.end.character
-                            // );
+                        // console.log(fp.ident.$cstNode?.range);
+                        // console.log(funcdef.func);
+                        var di = <DefsInside>{
+                            ident: fp.ident.name,
+                            pos: new Position(fp.ident.$cstNode.range.start.line, fp.ident.$cstNode.range.start.character),
+                            lv: lv,
+                            belong_to: funcdef.func,
+                            range: new Range(fp.ident.$cstNode.range.start as Position, funcdef.$cstNode?.range.end as Position)
+                        };
+                        this.vardefs.push(di);
+                        // console.log("%s begins at line: %d, character: %d; ends at line: %d, character: %d",
+                        //     di.ident,
+                        //     di.range.start.line,
+                        //     di.range.start.character,
+                        //     di.range.end.line,
+                        //     di.range.end.character,
+                        // );
                     }
                 });
             }
@@ -212,48 +238,62 @@ export class Defs {
         blks.bis.forEach(fp => {
             if (fp.decls) {
                 if (fp.decls.decls_spc.$type == ConstDecl){
-                    //console.log("Found a const decl:");
+                    // console.log("Found a const decl:");
                     const declnames = fp.decls.decls_spc.const_def;
                     declnames.forEach(decl => {
-                        //console.log("Ident: %s", decl.idents.name);
+                        // console.log("Ident: %s", decl.idents.name);
                         if (decl.idents.$cstNode?.range) {
-                            //console.log(decl.idents.$cstNode?.range);
+                            // console.log(decl.idents.$cstNode?.range);
                             if(blks.$cstNode?.range){
-                                this.vardefs.push([decl.idents.name, new Position(decl.idents.$cstNode.range.start.line, decl.idents.$cstNode.range.start.character), lv, func,
-                                    new Range(decl.idents.$cstNode.range.start as Position, blks.$cstNode?.range.end as Position)]);
-                                    // //console.log("%s begins at line: %d, character: %d; ends at line: %d, character: %d",
-                                    //     decl.idents.name,
-                                    //     decl.idents.$cstNode.range.start.line,
-                                    //     decl.idents.$cstNode.range.start.character,
-                                    //     blks.$cstNode?.range.end.line,
-                                    //     blks.$cstNode?.range.end.character
-                                    // );
+                                var di = <DefsInside>{
+                                    ident: decl.idents.name,
+                                    pos: new Position(decl.idents.$cstNode.range.start.line, decl.idents.$cstNode.range.start.character),
+                                    lv: lv,
+                                    belong_to: func,
+                                    range: new Range(decl.idents.$cstNode.range.start as Position, blks.$cstNode?.range.end as Position)
+                                };
+                                this.vardefs.push(di);;
+                                    
+                                // console.log("%s begins at line: %d, character: %d; ends at line: %d, character: %d",
+                                //     di.ident,
+                                //     di.range.start.line,
+                                //     di.range.start.character,
+                                //     di.range.end.line,
+                                //     di.range.end.character,
+                                // );
                             }
                         }
                         var initial_vals = decl.const_init_val;
                         if (initial_vals.const_exp) {
                             const calc_val = this.expcalc.calc(initial_vals.const_exp);
                             calc_val.forEach(val => {
-                                //console.log("calced a val of %s : %d", decl.idents.name, val);
+                                // console.log("calced a val of %s : %d", decl.idents.name, val);
                             });
                         }
                     });
                 }else if (fp.decls.decls_spc.$type == VarDecl) {
-                    //console.log("Found a var decl:");
+                    // console.log("Found a var decl:");
                     const declnames = fp.decls.decls_spc.var_def;
                     declnames.forEach(decl => {
-                        //console.log("Ident: %s", decl.idents.name);
+                        // console.log("Ident: %s", decl.idents.name);
                         if (decl.idents.$cstNode?.range) {
-                            //console.log(decl.idents.$cstNode?.range);
+                            // console.log(decl.idents.$cstNode?.range);
                             if (blks.$cstNode?.range) {
-                                this.vardefs.push([decl.idents.name, new Position(decl.idents.$cstNode.range.start.line, decl.idents.$cstNode.range.start.character), lv, func, 
-                                    new Range(decl.idents.$cstNode.range.start as Position, blks.$cstNode?.range.end as Position)]);
-                                // //console.log("%s begins at line: %d, character: %d; ends at line: %d, character: %d",
-                                //     decl.idents.name,
-                                //     decl.idents.$cstNode.range.start.line,
-                                //     decl.idents.$cstNode.range.start.character,
-                                //     blks.$cstNode?.range.end.line,
-                                //     blks.$cstNode?.range.end.character
+                                var di = <DefsInside>{
+                                    ident: decl.idents.name,
+                                    pos: new Position(decl.idents.$cstNode.range.start.line, decl.idents.$cstNode.range.start.character),
+                                    lv: lv,
+                                    belong_to: func,
+                                    range: new Range(decl.idents.$cstNode.range.start as Position, blks.$cstNode?.range.end as Position)
+                                };
+                                this.vardefs.push(di);;
+                                    
+                                // console.log("%s begins at line: %d, character: %d; ends at line: %d, character: %d",
+                                //     di.ident,
+                                //     di.range.start.line,
+                                //     di.range.start.character,
+                                //     di.range.end.line,
+                                //     di.range.end.character,
                                 // );
                             }
                         }
@@ -261,7 +301,7 @@ export class Defs {
                         if (initial_vals?.exps) {
                             const calc_val = this.expcalc.calc(initial_vals.exps);
                             calc_val.forEach(val => {
-                                //console.log("calced a val of %s : %d", decl.idents.name, val);
+                                // console.log("calced a val of %s : %d", decl.idents.name, val);
                             });
                         }
                     });
