@@ -86,7 +86,7 @@ export class Defs {
     
         if (decl_len == 0) {
             // console.log("NO decls");
-            return this.vardefs;
+            // return this.vardefs;
         }
     
         // console.log("Found decls");
