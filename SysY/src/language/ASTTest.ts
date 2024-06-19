@@ -215,6 +215,7 @@ export class Defs {
                             belong_to: funcdef.func,
                             range: new Range(fp.ident.$cstNode.range.start as Position, funcdef.$cstNode?.range.end as Position),
                             type: fp.vartype.mytype,
+                            funcfparam: fps,
                             unused: false
                         };
                         this.vardefs.push(di);
