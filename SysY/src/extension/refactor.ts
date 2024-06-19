@@ -8,8 +8,12 @@ import {
     TextEditorEdit,
     Position,
     TextDocument,
-    Range
+    Range,
+    window
 } from 'vscode';
+import * as ast from "../language/ASTTest.js"
+import { Node, IdentTable } from '../utils/IdentTable.js';
+// import { IdentRename } from './rename.js';
 
 export type TriggeredFrom = 'onSave' | 'onCommand' | 'codeAction';
 
@@ -28,7 +32,16 @@ const CODE_ACTIOINS2 = [
         kind: CodeActionKind.RefactorRewrite.append('refactor_reverse_boolean'),
         command: 'refactor.reverse.boolean',
     },
-]
+];
+
+const CODE_ACTIOINS3 = [
+    {
+        title: 'Rename Ident',
+        kind: CodeActionKind.RefactorRewrite.append('refactor_rename_ident'),
+        command: 'refactor.rename.ident',
+    },
+];
+
 export class FunctionExtractionProvider implements CodeActionProvider {
     static readonly ACTION_ID = 'refactor.extract.function';
     static readonly ACTION_KINDS = CODE_ACTIONS1.map(action => action.kind);
@@ -152,4 +165,87 @@ function replaceReg(text: string, l: RegExp, r:RegExp): [string, RegExpExecArray
     const lr = r.exec(text);
     text = text.replace(r, "");
     return [text, ll, lr];
+}
+
+export class IdentRenameProvider implements CodeActionProvider {
+    static readonly ACTION_ID = 'refactor.rename.ident';
+    static readonly ACTION_KINDS = CODE_ACTIOINS3.map(action => action.kind);
+    static readonly ACTION_COMMANDS = CODE_ACTIOINS3.map(({ title, kind, command }) => {
+        const action = new CodeAction(title, kind);
+        action.command = { command, title};
+        return action;
+    });
+
+    provideCodeActions(): ProviderResult<(CodeAction | Command)[]> {
+        return IdentRenameProvider.ACTION_COMMANDS;
+    }
+}
+
+export async function renameIdentCommand(editor: TextEditor, _: TextEditorEdit, from?: TriggeredFrom) {
+    if (!editor) {
+        return;
+    }
+    const { document } = editor;
+    if (!document) {
+        return;
+    }
+    var text = document.getText(editor.selection);
+
+    const newVariableName = await window.showInputBox({
+        prompt: 'Enter the new variable name',
+        value: 'new_ident'
+    });
+
+    if (!newVariableName) {
+        return; 
+    }
+
+    let declsTable = new IdentTable;
+    let varsTable = new IdentTable;
+    let targetTable = new IdentTable;
+    const vardefs = await ast.getAstModel();
+    const varidents = await ast.getAstModel_Ident();
+    declsTable.add_arrs_DI(vardefs);
+    varsTable.add_arrs(varidents);
+
+    let closest_node: Node;
+
+    declsTable.getnode().forEach(node => {
+        if (node.name === text && node.position.isBeforeOrEqual(editor.selection.start)){
+            targetTable.add_node(node);
+        }
+    });
+
+    console.log(targetTable);
+
+    if(!targetTable.isempty()){
+        window.showErrorMessage("Selected item is not an identer.");
+        return;
+    }
+    else{
+        closest_node = targetTable.getnode()[0];
+    }
+
+    targetTable.getnode().forEach(node => {
+        if (node.position.isAfter(closest_node.position)){
+            closest_node = node;
+        }
+    });
+    targetTable.clear();
+    targetTable.add_node(closest_node);
+
+    varsTable.getnode().forEach(node => {
+        if (node.name === text && closest_node.range.contains(node.position)){
+            targetTable.add_node(node);
+        }
+    });
+
+    console.log(targetTable);
+    editor.edit(edit => {
+        targetTable.getnode().forEach(node => {
+            console.log(new Range(node.position, new Position(node.position.line, node.position.character + text.length)));
+            edit.replace(new Range(node.position, new Position(node.position.line, node.position.character + text.length)), newVariableName);
+        });
+    });
+    
 }

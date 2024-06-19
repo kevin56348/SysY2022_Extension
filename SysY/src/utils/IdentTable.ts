@@ -1,7 +1,7 @@
 import { Position, Range } from "vscode";
 import { DefsInside } from "../language/ASTTest.js";
 
-interface Node {
+export interface Node {
     name: string; // ident name
     position: Position; // line number
     level: number; //hierarchy
@@ -21,6 +21,10 @@ export class IdentTable {
 
     add(name: string, position: Position, level: number, func_name: string, range: Range, type: string, funcfparam?: string[], unused?: boolean) {
         this.nodes.push({ name, position, level, func_name, range, type, funcfparam, unused });
+    }
+
+    add_node(node: Node){
+        this.nodes.push(node);
     }
 
     add_arr(arr: [string, Position, number, string, Range, string, string[] | undefined, boolean | undefined]) {
@@ -102,7 +106,7 @@ export class IdentTable {
 
     ps_match(testnode: Node) {
         return this.nodes.some(node => {
-            if (node.funcfparam && testnode.funcfparam) {
+            if (node.funcfparam ) {
                 // console.warn(node.funcfparam.length);
                 // console.log(testnode.funcfparam?.length);
                 if (node.funcfparam.length === testnode.funcfparam?.length) {
@@ -124,7 +128,11 @@ export class IdentTable {
                 && node.position.isAfter(testnode.position)
                 && node.level >= testnode.level
                 && node.range.start.isAfter(testnode.range.start)
-                && node.range.end.isBeforeOrEqual(testnode.range.end);
+                && node.range.end.isBefore(testnode.range.end);
         });
+    }
+
+    isempty():boolean{
+        return (this.nodes.length != 0);
     }
 }

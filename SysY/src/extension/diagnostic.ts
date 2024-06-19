@@ -64,16 +64,15 @@ export class IdentDiagnostic {
                         );
                         diagnosticsArray.push(diagnostic);
                     }
-                } else {
-                    if (node.funcfparam && !this.declsTable.ps_match(node)) {
-                        const diagnostic = new vscode.Diagnostic(
-                            new vscode.Range(node.position, new vscode.Position(node.position.line, node.position.character + node.name.length)),
-                            node.name + ' FuncParams do not match',
-                            vscode.DiagnosticSeverity.Error
-                        );
-                        diagnosticsArray.push(diagnostic);
-                    }
-                }
+                } 
+                if (node.funcfparam && !this.declsTable.ps_match(node)) {
+                    const diagnostic = new vscode.Diagnostic(
+                        new vscode.Range(node.position, new vscode.Position(node.position.line, node.position.character + node.name.length)),
+                        node.name + ' FuncParams do not match',
+                        vscode.DiagnosticSeverity.Error
+                    );
+                    diagnosticsArray.push(diagnostic);
+                } 
             }
 
         });
