@@ -579,7 +579,7 @@ export class Idents {
                 }
             } 
 
-            if (fp.stmts) {
+            if (fp.stmts && !fp.stmts.exp) {
                 if (fp.stmts.b || fp.stmts.c || fp.stmts.r) {
                     is_unused = true;
                 }
