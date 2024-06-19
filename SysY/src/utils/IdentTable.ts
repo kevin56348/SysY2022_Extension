@@ -106,7 +106,7 @@ export class IdentTable {
 
     ps_match(testnode: Node) {
         return this.nodes.some(node => {
-            if (node.funcfparam && testnode.funcfparam) {
+            if (node.funcfparam ) {
                 // console.warn(node.funcfparam.length);
                 // console.log(testnode.funcfparam?.length);
                 if (node.funcfparam.length === testnode.funcfparam?.length) {
@@ -128,7 +128,7 @@ export class IdentTable {
                 && node.position.isAfter(testnode.position)
                 && node.level >= testnode.level
                 && node.range.start.isAfter(testnode.range.start)
-                && node.range.end.isBeforeOrEqual(testnode.range.end);
+                && node.range.end.isBefore(testnode.range.end);
         });
     }
 
