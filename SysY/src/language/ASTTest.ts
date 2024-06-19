@@ -197,12 +197,14 @@ export class Defs {
         lv += 1;
         funcdefs.forEach(funcdef => {
             if (funcdef.funcfps) {
-                // add params into defs
+                console.warn("123123123123123");                // add params into defs
                 var fps: string[] = [];
-                funcdef.funcfps.funcfp.forEach(f => {
-                    fps.push(f.vartype.mytype.toString());
-                });
-
+                if (funcdef.funcfps) {
+                    funcdef.funcfps.funcfp.forEach(f => {
+                        fps.push(f.vartype.mytype.toString());
+                    });
+                }
+                
                 funcdef.funcfps.funcfp.forEach(fp => {
                     // console.log(fp.ident.name);
                     if (fp.ident.$cstNode?.range) {
@@ -218,8 +220,9 @@ export class Defs {
                         this.vardefs.push(di);
                     }
                 });
-
-                if(funcdef.$cstNode?.range){
+                
+            }
+                if(funcdef.$cstNode){
                     var di = <DefsInside>{
                         ident: funcdef.func,
                         pos: new Position(funcdef.$cstNode.range.start.line, funcdef.$cstNode.range.start.character),
@@ -227,13 +230,12 @@ export class Defs {
                         belong_to: "",
                         range: new Range(funcdef.$cstNode.range.start as Position, model.$cstNode?.range.end as Position),
                         type: funcdef.functype.mytype,
-                        funcfparam: fps,
+                        funcfparam: [],
                         unused: false
                     };
                     this.vardefs.push(di);
-                    console.log("Added func: ", funcdef.func, " whose params are ", fps);
+                    console.log("Added func: ", funcdef.func, " whose params are ", "void");
                 }
-            }
 
             if (funcdef.blks) {
                 // inside funcdef
@@ -258,7 +260,7 @@ export class Defs {
             this.traverse_blk(stmt.blks, lv , func, is_unused);
         }
         if (stmt.stmts) {
-            if (stmt.b || stmt.c || stmt.r) {
+            if (stmt.b || stmt.c ) {
                 is_unused = true;
             }
 
@@ -268,7 +270,7 @@ export class Defs {
                 }
                 if (st.stmts) {
                     st.stmts.forEach(b => {
-                        if (b.b || b.c || b.r) {
+                        if (b.b || b.c ) {
                             is_unused = true;
                         }
                         this.traverse_stmt(b, lv , func, is_unused);
@@ -343,7 +345,7 @@ export class Defs {
             } 
 
             if (fp.stmts) {
-                if (fp.stmts.c || fp.stmts.b || fp.stmts.r) {
+                if (fp.stmts.c || fp.stmts.b ) {
                     is_unused = true;
                 }
                 this.traverse_stmt(fp.stmts, lv + 1, func, is_unused);
@@ -580,7 +582,7 @@ export class Idents {
             } 
 
             if (fp.stmts) {
-                if (fp.stmts.b || fp.stmts.c || fp.stmts.r) {
+                if (fp.stmts.b || fp.stmts.c ) {
                     is_unused = true;
                 }
                 this.traverse_stmt(fp.stmts, lv + 1, func, is_unused);
@@ -635,7 +637,7 @@ export class Idents {
                         lv,
                         func,
                         new Range(exps.idents.$cstNode.range.start as Position, exps.$cstNode?.range.end as Position),
-                        "func",
+                        "f",
                         rpss,
                         is_unused
                     ]);
