@@ -197,13 +197,11 @@ export class Defs {
         lv += 1;
         funcdefs.forEach(funcdef => {
             if (funcdef.funcfps) {
-                console.warn("123123123123123");                // add params into defs
+                // console.warn("123123123123123");                // add params into defs
                 var fps: string[] = [];
-                if (funcdef.funcfps) {
-                    funcdef.funcfps.funcfp.forEach(f => {
-                        fps.push(f.vartype.mytype.toString());
-                    });
-                }
+                funcdef.funcfps.funcfp.forEach(f => {
+                    fps.push(f.vartype.mytype.toString());
+                });
                 
                 funcdef.funcfps.funcfp.forEach(fp => {
                     // console.log(fp.ident.name);
@@ -215,14 +213,28 @@ export class Defs {
                             belong_to: funcdef.func,
                             range: new Range(fp.ident.$cstNode.range.start as Position, funcdef.$cstNode?.range.end as Position),
                             type: fp.vartype.mytype,
-                            funcfparam: fps,
                             unused: false
                         };
                         this.vardefs.push(di);
-                    }
+                }
                 });
+
+                if(funcdef.$cstNode){
+                    var di = <DefsInside>{
+                        ident: funcdef.func,
+                        pos: new Position(funcdef.$cstNode.range.start.line, funcdef.$cstNode.range.start.character),
+                        lv: 0,
+                        belong_to: "",
+                        range: new Range(funcdef.$cstNode.range.start as Position, model.$cstNode?.range.end as Position),
+                        type: funcdef.functype.mytype,
+                        funcfparam: fps,
+                        unused: false
+                    };
+                    this.vardefs.push(di);
+                    console.log("Added func: ", funcdef.func, " whose params are ", fps);
+                }
                 
-            }
+            } else {
                 if(funcdef.$cstNode){
                     var di = <DefsInside>{
                         ident: funcdef.func,
@@ -237,6 +249,7 @@ export class Defs {
                     this.vardefs.push(di);
                     console.log("Added func: ", funcdef.func, " whose params are ", "void");
                 }
+            }
 
             if (funcdef.blks) {
                 // inside funcdef
@@ -638,11 +651,11 @@ export class Idents {
                         lv,
                         func,
                         new Range(exps.idents.$cstNode.range.start as Position, exps.$cstNode?.range.end as Position),
-                        "f",
+                        "",
                         rpss,
                         is_unused
                     ]);
-                    // console.log(exps.idents.name, rpss);
+                    console.log("find func usage: ",exps.idents.name, rpss);
                 }
             }
         }
