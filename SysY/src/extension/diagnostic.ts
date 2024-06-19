@@ -24,7 +24,7 @@ export class IdentDiagnostic {
         const diagnosticsArray: vscode.Diagnostic[] = [];
 
         this.varsTable.getnode().forEach(node => {
-            console.log("~~~" + node.name + ":" + this.declsTable.match(node));
+            // console.log("~~~" + node.name + ":" + this.declsTable.match(node));
             if (!this.declsTable.match(node)){
                 const diagnostic = new vscode.Diagnostic(
                     new vscode.Range(node.position, new vscode.Position(node.position.line, node.position.character + node.name.length)),
@@ -34,6 +34,20 @@ export class IdentDiagnostic {
                 diagnosticsArray.push(diagnostic);
             }
         });
+
+        this.declsTable.getnode().forEach(node => {
+            let shadow_line = this.declsTable.isshadow(node);
+            console.log("~~~", node.name, node.range, shadow_line);
+            if (shadow_line != -1){
+                const diagnostic = new vscode.Diagnostic(
+                    new vscode.Range(node.position, new vscode.Position(node.position.line, node.position.character + node.name.length)),
+                    node.name + ' shadows ' + node.name + ' in line ' + (shadow_line + 1) + '.',
+                    vscode.DiagnosticSeverity.Warning
+                );
+                diagnosticsArray.push(diagnostic);
+            }
+        });
+
 
         this.diagnostics.set(document.uri, diagnosticsArray);
         console.log(this.declsTable);

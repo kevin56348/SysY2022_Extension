@@ -75,4 +75,19 @@ export class IdentTable {
     getnode():Node[]{
         return this.nodes;
     }
+
+    isshadow(testnode:Node){
+        let line = -1;
+        let num = 0;
+        this.nodes.forEach(node => {
+            if (node.name === testnode.name
+                && node.range.start.isBefore(testnode.range.start)
+                && node.range.end.isAfterOrEqual(testnode.range.end)
+            ){
+                num = num + 1;
+                line = node.position.line;
+            }
+        });
+        return line;
+    }
 }
