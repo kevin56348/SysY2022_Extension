@@ -4,6 +4,7 @@ import { EmptyFileSystem } from "langium";
 import {createSysYServices} from "./sys-y-module.js"
 import { Position, Range } from "vscode";
 import * as vscode from "vscode";
+// import { isUnionType } from "langium/grammar";
 // import { CompletionItemLabelDetails } from "vscode-languageclient";
 
 export interface DefsInside {
@@ -14,6 +15,7 @@ export interface DefsInside {
     range: Range;
     type?: string;
     funcfparam?: string[];
+    unused: boolean;
 }
 
 export async function getAstModel() : Promise<DefsInside[]>{
@@ -41,10 +43,10 @@ export async function getAstModel() : Promise<DefsInside[]>{
     return vardefs;
 }
 
-export async function getAstModel_Ident() : Promise<[string, Position, number, string, Range, string, string[] | undefined][]>{
+export async function getAstModel_Ident() : Promise<[string, Position, number, string, Range, string, string[] | undefined, boolean | undefined][]>{
     const services = createSysYServices(EmptyFileSystem);
     const parse = parseHelper<Model>(services.SysY);
-    var varidents: Array<[string, Position, number, string, Range, string, string[] | undefined]> = [];
+    var varidents: Array<[string, Position, number, string, Range, string, string[] | undefined, boolean | undefined]> = [];
     const td = vscode.window.activeTextEditor?.document;
     var doc: string = "";
 
@@ -143,7 +145,8 @@ export class Defs {
                                 lv: lv,
                                 belong_to: "",
                                 range: new Range(decl.idents.$cstNode.range.start as Position, model.$cstNode?.range.end as Position),
-                                type: declspc.decls_spc.vartype.mytype.toString()
+                                type: declspc.decls_spc.vartype.mytype.toString(),
+                                unused: false
                             };
                             this.vardefs.push(di);
                         }
@@ -170,7 +173,8 @@ export class Defs {
                                 lv: lv,
                                 belong_to: "",
                                 range: new Range(decl.idents.$cstNode.range.start as Position, model.$cstNode?.range.end as Position),
-                                type: declspc.decls_spc.vartype.mytype.toString()
+                                type: declspc.decls_spc.vartype.mytype.toString(),
+                                unused: false
                             };
                             this.vardefs.push(di);
                         }
@@ -209,6 +213,7 @@ export class Defs {
                             belong_to: funcdef.func,
                             range: new Range(fp.ident.$cstNode.range.start as Position, funcdef.$cstNode?.range.end as Position),
                             type: fp.vartype.mytype,
+                            unused: false
                         };
                         this.vardefs.push(di);
                     }
@@ -222,7 +227,8 @@ export class Defs {
                         belong_to: "",
                         range: new Range(funcdef.$cstNode.range.start as Position, model.$cstNode?.range.end as Position),
                         type: funcdef.functype.mytype,
-                        funcfparam: fps
+                        funcfparam: fps,
+                        unused: false
                     };
                     this.vardefs.push(di);
                     console.log("Added func: ", funcdef.func, " whose params are ", fps);
@@ -231,7 +237,7 @@ export class Defs {
 
             if (funcdef.blks) {
                 // inside funcdef
-                this.traverse_blk(funcdef.blks, lv, funcdef.func);
+                this.traverse_blk(funcdef.blks, lv, funcdef.func, false);
             }
             
 
@@ -241,23 +247,31 @@ export class Defs {
         // lv == 1 in mainfunc
         
         const mainfuncdef = model.mainfuncdef;
-        this.traverse_blk(mainfuncdef.blks, lv, "main");
+        this.traverse_blk(mainfuncdef.blks, lv, "main", false);
 
         return this.vardefs;
     }
 
-    traverse_stmt(stmt: Stmt, lv: number, func: string) {
+    traverse_stmt(stmt: Stmt, lv: number, func: string, is_unused: boolean) {
+        var is_unused = false;
         if (stmt.blks) {
-            this.traverse_blk(stmt.blks, lv , func);
+            this.traverse_blk(stmt.blks, lv , func, is_unused);
         }
-        if(stmt.stmts){
+        if (stmt.stmts) {
+            if (stmt.b || stmt.c || stmt.r) {
+                is_unused = true;
+            }
+
             stmt.stmts.forEach(st => {
                 if (st.blks) {
-                    this.traverse_blk(st.blks, lv, func );
+                    this.traverse_blk(st.blks, lv, func, is_unused );
                 }
                 if (st.stmts) {
                     st.stmts.forEach(b => {
-                        this.traverse_stmt(b, lv , func);
+                        if (b.b || b.c || b.r) {
+                            is_unused = true;
+                        }
+                        this.traverse_stmt(b, lv , func, is_unused);
                     });
                 }
 
@@ -265,7 +279,7 @@ export class Defs {
         }
     }
 
-    traverse_blk(blks: Block, lv: number, func: string) {
+    traverse_blk(blks: Block, lv: number, func: string, is_unused: boolean) {
         blks.bis.forEach(fp => {
             if (fp.decls) {
                 if (fp.decls.decls_spc.$type == ConstDecl){
@@ -282,7 +296,8 @@ export class Defs {
                                     lv: lv,
                                     belong_to: func,
                                     range: new Range(decl.idents.$cstNode.range.start as Position, blks.$cstNode?.range.end as Position),
-                                    type: (fp.decls as Decl).decls_spc.vartype.mytype.toString()
+                                    type: (fp.decls as Decl).decls_spc.vartype.mytype.toString(),
+                                    unused: is_unused
                                 };
                                 this.vardefs.push(di);
                             }
@@ -309,7 +324,8 @@ export class Defs {
                                     lv: lv,
                                     belong_to: func,
                                     range: new Range(decl.idents.$cstNode.range.start as Position, blks.$cstNode?.range.end as Position),
-                                    type: (fp.decls as Decl).decls_spc.vartype.mytype.toString()
+                                    type: (fp.decls as Decl).decls_spc.vartype.mytype.toString(),
+                                    unused: is_unused
                                 };
                                 this.vardefs.push(di);
                                     
@@ -327,7 +343,10 @@ export class Defs {
             } 
 
             if (fp.stmts) {
-                this.traverse_stmt(fp.stmts, lv + 1, func);
+                if (fp.stmts.c || fp.stmts.b || fp.stmts.r) {
+                    is_unused = true;
+                }
+                this.traverse_stmt(fp.stmts, lv + 1, func, is_unused);
             }
 
         });
@@ -346,9 +365,9 @@ class ExpCalc{
 
     getExpVal(exp: Exp) : Array<number> {
 
-        if (exp.numint != undefined) {
+        if (exp.numint) {
             this.vals.push(exp.numint);
-            return [];
+            return this.vals;
         }
 
         const exps = exp.exps;
@@ -363,7 +382,7 @@ class ExpCalc{
 
 export class Idents {
     expcalc = new ExpCalc;
-    vardefs: Array<[string, Position, number, string, Range, string, string[] | undefined]> = [];
+    vardefs: Array<[string, Position, number, string, Range, string, string[] | undefined, boolean | undefined]> = [];
 
     getAllIdents(model: Model) {
 
@@ -389,16 +408,16 @@ export class Idents {
                     var const_exps = decl.const_exp;
                     if (const_exps){
                         const_exps.forEach(const_exp => {
-                            this.traverse_exp(const_exp, lv, "");
+                            this.traverse_exp(const_exp, lv, "", false);
                         });
                     }
                     var initial_vals = decl.const_init_val;
                     if (initial_vals.const_exp) {
-                        this.traverse_exp(initial_vals.const_exp, lv, "");
+                        this.traverse_exp(initial_vals.const_exp, lv, "", false);
                     }
                     else if (initial_vals.const_init_val){
                         initial_vals.const_init_val.forEach(const_init_val => {
-                            this.traverse_const_init_val(const_init_val, lv, "");   
+                            this.traverse_const_init_val(const_init_val, lv, "", false);   
                         });
                     }
                 });
@@ -409,17 +428,17 @@ export class Idents {
                     var const_exps = decl.const_exp;
                     if (const_exps){
                         const_exps.forEach(const_exp => {
-                            this.traverse_exp(const_exp, lv, "");
+                            this.traverse_exp(const_exp, lv, "", false);
                         });
                     }
                     var initial_vals = decl.init_val;
                     if (initial_vals) {
                         if (initial_vals.exps) {
-                            this.traverse_exp(initial_vals.exps, lv, "");
+                            this.traverse_exp(initial_vals.exps, lv, "", false);
                         }
                         else if (initial_vals.init_vals){
                             initial_vals.init_vals.forEach(init_val => {
-                                this.traverse_init_val(init_val, lv, "");   
+                                this.traverse_init_val(init_val, lv, "", false);   
                             });
                         }
                     }
@@ -437,7 +456,7 @@ export class Idents {
                 funcdef.funcfps.funcfp.forEach(fp => {
                     if (fp.const_exp){
                         fp.const_exp.forEach(cexp=>{
-                            this.traverse_exp(cexp, lv, funcdef.func);
+                            this.traverse_exp(cexp, lv, funcdef.func, false);
                         });
                     }
                 });
@@ -445,7 +464,7 @@ export class Idents {
 
             if (funcdef.blks) {
                 // inside funcdef
-                this.traverse_blk(funcdef.blks, lv, funcdef.func);
+                this.traverse_blk(funcdef.blks, lv, funcdef.func, false);
             }
             
 
@@ -456,35 +475,35 @@ export class Idents {
         
         const mainfuncdef = model.mainfuncdef;
         if(mainfuncdef){
-            this.traverse_blk(mainfuncdef.blks, lv, "main");
+            this.traverse_blk(mainfuncdef.blks, lv, "main", false);
         }
 
         return this.vardefs;
     }
 
-    traverse_stmt(stmt: Stmt, lv: number, func: string) {
+    traverse_stmt(stmt: Stmt, lv: number, func: string, is_unused: boolean) {
         if (stmt.blks) {
-            this.traverse_blk(stmt.blks, lv , func);
+            this.traverse_blk(stmt.blks, lv , func, is_unused);
         }
         if(stmt.stmts){
             stmt.stmts.forEach(st => {
                 if (st.blks) {
-                    this.traverse_blk(st.blks, lv, func );
+                    this.traverse_blk(st.blks, lv, func , is_unused);
                 }
                 if (st.stmts) {
                     st.stmts.forEach(b => {
-                        this.traverse_stmt(b, lv , func);
+                        this.traverse_stmt(b, lv , func,is_unused);
                     });
                 }
 
             });
         }
         if (stmt.exp){
-            this.traverse_exp(stmt.exp, lv, func);
+            this.traverse_exp(stmt.exp, lv, func, is_unused);
         }
         if (stmt.exps){
             stmt.exps.forEach(sexp => {
-                this.traverse_exp(sexp, lv, func);
+                this.traverse_exp(sexp, lv, func, is_unused);
             });
         }
         if (stmt.lv){
@@ -498,14 +517,21 @@ export class Idents {
                         func,
                         new Range(stmt.lv.idents.$cstNode.range.start as Position, stmt.$cstNode?.range.end as Position),
                         "void",
-                        undefined
+                        undefined,
+                        is_unused
                     ]);
                 }
             }
         }
+        if (stmt.conds) {
+            // ONLY ONE EXP EXISTS IN COND
+            // console.warn(stmt.conds.exps.length);
+            console.log(this.expcalc.calc(stmt.conds.exps[0]));
+            this.traverse_exp(stmt.conds.exps[0], lv, func, is_unused);
+        }
     }
 
-    traverse_blk(blks: Block, lv: number, func: string) {
+    traverse_blk(blks: Block, lv: number, func: string, is_unused: boolean) {
         blks.bis.forEach(fp => {
             if (fp.decls) {
                 if (fp.decls.decls_spc.$type == ConstDecl){
@@ -515,16 +541,16 @@ export class Idents {
                         var const_exps = decl.const_exp;
                         if (const_exps){
                             const_exps.forEach(const_exp => {
-                                this.traverse_exp(const_exp, lv, "");
+                                this.traverse_exp(const_exp, lv, "", is_unused);
                             });
                         }
                         var initial_vals = decl.const_init_val;
                         if (initial_vals.const_exp) {
-                            this.traverse_exp(initial_vals.const_exp, lv, "");
+                            this.traverse_exp(initial_vals.const_exp, lv, "", is_unused);
                         }
                         else if (initial_vals.const_init_val){
                             initial_vals.const_init_val.forEach(const_init_val => {
-                                this.traverse_const_init_val(const_init_val, lv, "");   
+                                this.traverse_const_init_val(const_init_val, lv, "", is_unused);   
                             });
                         }
                     });
@@ -535,17 +561,17 @@ export class Idents {
                         var const_exps = decl.const_exp;
                         if (const_exps){
                             const_exps.forEach(const_exp => {
-                                this.traverse_exp(const_exp, lv, "");
+                                this.traverse_exp(const_exp, lv, "", is_unused);
                             });
                         }
                         var initial_vals = decl.init_val;
                         if (initial_vals) {
                             if (initial_vals.exps) {
-                                this.traverse_exp(initial_vals.exps, lv, "");
+                                this.traverse_exp(initial_vals.exps, lv, "", is_unused);
                             }
                             else if (initial_vals.init_vals){
                                 initial_vals.init_vals.forEach(init_val => {
-                                    this.traverse_init_val(init_val, lv, "");   
+                                    this.traverse_init_val(init_val, lv, "", is_unused);   
                                 });
                             }
                         }
@@ -554,16 +580,19 @@ export class Idents {
             } 
 
             if (fp.stmts) {
-                this.traverse_stmt(fp.stmts, lv + 1, func);
+                if (fp.stmts.b || fp.stmts.c || fp.stmts.r) {
+                    is_unused = true;
+                }
+                this.traverse_stmt(fp.stmts, lv + 1, func, is_unused);
             }
 
         });
     }
 
-    traverse_exp (exps: Exp, lv: number, func: string) {
+    traverse_exp (exps: Exp, lv: number, func: string, is_unused: boolean) {
         if (exps.exps){
             exps.exps.forEach(eexp => {
-                this.traverse_exp(eexp, lv, func);
+                this.traverse_exp(eexp, lv, func, is_unused);
             });
         }
         if (exps.lv){
@@ -579,7 +608,8 @@ export class Idents {
                             func,
                             new Range(elv.idents.$cstNode.range.start as Position, exps.$cstNode?.range.end as Position),
                             "void",
-                            undefined
+                            undefined,
+                            is_unused
                         ]);
                     }
                 }
@@ -606,7 +636,8 @@ export class Idents {
                         func,
                         new Range(exps.idents.$cstNode.range.start as Position, exps.$cstNode?.range.end as Position),
                         "func",
-                        rpss
+                        rpss,
+                        is_unused
                     ]);
                     // console.log(exps.idents.name, rpss);
                 }
@@ -615,24 +646,24 @@ export class Idents {
 
     }
 
-    traverse_const_init_val (const_init_vals: ConstInitVal, lv: number, func: string) {
+    traverse_const_init_val (const_init_vals: ConstInitVal, lv: number, func: string, is_unused: boolean) {
         if (const_init_vals.const_exp){
-            this.traverse_exp(const_init_vals.const_exp, lv, func);
+            this.traverse_exp(const_init_vals.const_exp, lv, func, is_unused);
         }
         else if (const_init_vals.const_init_val){
             const_init_vals.const_init_val.forEach(civ=>{
-                this.traverse_const_init_val(civ, lv, func);
+                this.traverse_const_init_val(civ, lv, func, is_unused);
             });
         }
     }
 
-    traverse_init_val (init_vals: InitVal, lv: number, func: string) {
+    traverse_init_val (init_vals: InitVal, lv: number, func: string, is_unused: boolean) {
         if (init_vals.exps){
-            this.traverse_exp(init_vals.exps, lv, func);
+            this.traverse_exp(init_vals.exps, lv, func, is_unused);
         }
         else if (init_vals.init_vals){
             init_vals.init_vals.forEach(iv=>{
-                this.traverse_init_val(iv, lv, func);
+                this.traverse_init_val(iv, lv, func, is_unused);
             });
         }
     }

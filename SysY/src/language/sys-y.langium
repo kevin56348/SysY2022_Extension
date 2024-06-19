@@ -56,12 +56,21 @@ Stmt:
     (exp=Exp)? ';' | 
     blks=Block | 
     'if' '(' conds=Cond ')' stmts+=Stmt ( 'else' stmts+=Stmt )?  | 
-    'while' '(' conds+=Cond ')' stmts+=Stmt |
-    'break' ';' | 
-    'continue' ';' | 
-    'return' (exp=Exp)? ';' | 
+    'while' '(' conds=Cond ')' stmts+=Stmt |
+    b=BreakStmt | 
+    c=ContiStmt | 
+    r=ReturnStmt (exp=Exp)? ';' | 
     lv=LVal '=' 'getint''('')'';' | 
     'printf''('str=STRING (',' exps+=Exp)*')'';';
+
+BreakStmt:
+    b = 'break' ';';
+
+ContiStmt:
+    c = 'continue' ';';
+
+ReturnStmt:
+    d = 'return';
 
 Exp:
     exps+=AddExp;

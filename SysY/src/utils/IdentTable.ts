@@ -9,6 +9,7 @@ interface Node {
     range: Range; // vaild range
     type: string;
     funcfparam?: string[];
+    unused?: boolean;
 }
 
 export class IdentTable {
@@ -18,11 +19,11 @@ export class IdentTable {
         this.nodes = [];
     }
 
-    add(name: string, position: Position, level: number, func_name: string, range: Range, type: string, funcfparam?: string[]) {
-        this.nodes.push({ name, position, level, func_name, range, type, funcfparam });
+    add(name: string, position: Position, level: number, func_name: string, range: Range, type: string, funcfparam?: string[], unused?: boolean) {
+        this.nodes.push({ name, position, level, func_name, range, type, funcfparam, unused });
     }
 
-    add_arr(arr: [string, Position, number, string, Range, string, string[] | undefined]) {
+    add_arr(arr: [string, Position, number, string, Range, string, string[] | undefined, boolean | undefined]) {
         this.nodes.push({
             name: arr[0], 
             position: arr[1], 
@@ -30,11 +31,12 @@ export class IdentTable {
             func_name: arr[3], 
             range: arr[4],
             type: arr[5],
-            funcfparam: arr[6]
+            funcfparam: arr[6],
+            unused: arr[7]
         });
     }
 
-    add_arrs(arrs: [string, Position, number, string, Range, string, string[] | undefined][]): Node[] {
+    add_arrs(arrs: [string, Position, number, string, Range, string, string[] | undefined, boolean | undefined][]): Node[] {
         this.clear();
         arrs.forEach(arr=>{
             this.nodes.push({
@@ -44,8 +46,9 @@ export class IdentTable {
                 func_name: arr[3], 
                 range: arr[4],
                 type: arr[5],
-                funcfparam: arr[6]
-            });
+                funcfparam: arr[6],
+                unused: arr[7]
+        });
         });
         return this.nodes;
     }
@@ -60,7 +63,8 @@ export class IdentTable {
                 func_name: di.belong_to, 
                 range: di.range,
                 type: di.type as string,
-                funcfparam: di.funcfparam
+                funcfparam: di.funcfparam,
+                unused: di.unused
             });
         });
     }
@@ -71,11 +75,6 @@ export class IdentTable {
 
     match(testnode: Node) {
         return this.nodes.some(node => {
-            // console.log(node.name, testnode.name);
-            // console.log(node.position.isBefore(testnode.position));
-            // console.log(node.level, testnode.level)
-            // console.log(node.func_name, testnode.func_name);
-            // console.log(node.range, testnode.range);
             return node.name === testnode.name
                 && node.position.isBefore(testnode.position)
                 && node.level <= testnode.level
@@ -103,7 +102,7 @@ export class IdentTable {
 
     ps_match(testnode: Node) {
         return this.nodes.some(node => {
-            if (node.funcfparam) {
+            if (node.funcfparam && testnode.funcfparam) {
                 // console.warn(node.funcfparam.length);
                 // console.log(testnode.funcfparam?.length);
                 if (node.funcfparam.length === testnode.funcfparam?.length) {
@@ -116,6 +115,16 @@ export class IdentTable {
                 }
             }
             return false;
+        });
+    }
+
+    unused(testnode: Node) {
+        return this.nodes.some(node => { // left is var used, testnodes shall be declarations
+            return node.name === testnode.name
+                && node.position.isAfter(testnode.position)
+                && node.level >= testnode.level
+                && node.range.start.isAfter(testnode.range.start)
+                && node.range.end.isBeforeOrEqual(testnode.range.end);
         });
     }
 }

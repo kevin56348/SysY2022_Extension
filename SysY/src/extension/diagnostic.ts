@@ -23,26 +23,59 @@ export class IdentDiagnostic {
 
         const diagnosticsArray: vscode.Diagnostic[] = [];
 
-        this.varsTable.getnode().forEach(node => {
-            // console.log("~~~" + node.name + ":" + this.declsTable.match(node));
-            if (!this.declsTable.match(node)){
+        this.declsTable.getnode().forEach(node => {
+            if (!this.varsTable.unused(node)) {
+                // find decl in var
+                // not used here
                 const diagnostic = new vscode.Diagnostic(
                     new vscode.Range(node.position, new vscode.Position(node.position.line, node.position.character + node.name.length)),
-                    node.name + ' was not declared in this scope.',
-                    vscode.DiagnosticSeverity.Error
+                    'Unused var ' + node.name + ' in ' + node.func_name + ' at line ' + node.position.line,
+                    vscode.DiagnosticSeverity.Warning
                 );
                 diagnosticsArray.push(diagnostic);
-            } else {
-                if (!this.declsTable.ps_match(node)) {
+            }
+        });
+
+        this.varsTable.getnode().forEach(node => {
+            // console.log("~~~" + node.name + ":" + this.declsTable.match(node));
+            if (node.unused) {
+                if (node.unused as boolean) {
                     const diagnostic = new vscode.Diagnostic(
                         new vscode.Range(node.position, new vscode.Position(node.position.line, node.position.character + node.name.length)),
-                        node.name + ' FuncParams do not match',
-                        vscode.DiagnosticSeverity.Error
+                        'dead code.',
+                        vscode.DiagnosticSeverity.Information
                     );
                     diagnosticsArray.push(diagnostic);
                 }
-                
+            } else {
+                if (!this.declsTable.match(node)) {
+                    if (node.funcfparam === undefined) {
+                        const diagnostic = new vscode.Diagnostic(
+                            new vscode.Range(node.position, new vscode.Position(node.position.line, node.position.character + node.name.length)),
+                            node.name + ' was not declared in this scope.',
+                            vscode.DiagnosticSeverity.Error
+                        );
+                        diagnosticsArray.push(diagnostic);
+                    } else {
+                        const diagnostic = new vscode.Diagnostic(
+                            new vscode.Range(node.position, new vscode.Position(node.position.line, node.position.character + node.name.length)),
+                            'Function ' + node.name + ' was not declared.',
+                            vscode.DiagnosticSeverity.Error
+                        );
+                        diagnosticsArray.push(diagnostic);
+                    }
+                } else {
+                    if (node.funcfparam && !this.declsTable.ps_match(node)) {
+                        const diagnostic = new vscode.Diagnostic(
+                            new vscode.Range(node.position, new vscode.Position(node.position.line, node.position.character + node.name.length)),
+                            node.name + ' FuncParams do not match',
+                            vscode.DiagnosticSeverity.Error
+                        );
+                        diagnosticsArray.push(diagnostic);
+                    }
+                }
             }
+
         });
 
         this.declsTable.getnode().forEach(node => {
