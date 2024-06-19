@@ -57,7 +57,7 @@ export class SysYIdentHover implements vscode.HoverProvider {
     };
 
     findAllConstDecls(){ 
-        var vardefs = ast.getAstModel();
+        const vardefs = ast.getAstModel();
 
         vardefs.then(
             res => {
@@ -68,8 +68,13 @@ export class SysYIdentHover implements vscode.HoverProvider {
                 });
                 
             }
-        )
+        ).catch(
+            err => {
+                console.error(err);
+            }
+        );
     };
+
 }
 
 

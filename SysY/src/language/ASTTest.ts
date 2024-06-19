@@ -1,9 +1,10 @@
 import { parseHelper } from "langium/test";
-import { Block, ConstDecl, Exp, Model, Stmt, VarDecl } from "../language/generated/ast.js";
+import { Block, ConstDecl, Exp, Model, Stmt, VarDecl, ConstInitVal, InitVal } from "../language/generated/ast.js";
 import { EmptyFileSystem } from "langium";
 import {createSysYServices} from "./sys-y-module.js"
 import { Position, Range } from "vscode";
 import * as vscode from "vscode";
+// import { CompletionItemLabelDetails } from "vscode-languageclient";
 
 export interface DefsInside {
     ident: string;
@@ -16,15 +17,13 @@ export interface DefsInside {
 export async function getAstModel() : Promise<DefsInside[]>{
     const services = createSysYServices(EmptyFileSystem);
     const parse = parseHelper<Model>(services.SysY);
-
-    const td = vscode.workspace.textDocuments;
-
+    var vardefs: Array<DefsInside> = [];
     var doc: string = "";
+    const td = vscode.window.activeTextEditor?.document;
 
-    td.forEach(t => {
-        doc += t.getText();
-        // console.log(doc);
-    });
+    if (td) {
+        doc = td.getText();
+    }
 
     const document = await parse(doc);
 
@@ -34,11 +33,35 @@ export async function getAstModel() : Promise<DefsInside[]>{
 
     const finddef = new Defs;
 
-    var vardefs: Array<DefsInside>;
 
     vardefs = finddef.getAllDefs(model);
 
     return vardefs;
+}
+
+export async function getAstModel_Ident() : Promise<[string, Position, number, string, Range][]>{
+    const services = createSysYServices(EmptyFileSystem);
+    const parse = parseHelper<Model>(services.SysY);
+    var varidents: Array<[string, Position, number, string, Range]> = [];
+    const td = vscode.window.activeTextEditor?.document;
+    var doc: string = "";
+
+    if (td) {
+        doc = td.getText();
+    }
+    
+
+    const document = await parse(doc);
+
+    const model = document.parseResult.value;
+
+    //console.log(model);
+
+    const finddef = new Idents;
+
+    varidents = finddef.getAllIdents(model);
+
+    return varidents;
 }
 
 export class Defs {
@@ -55,7 +78,6 @@ export class Defs {
         const decls = model.decls;
         const decl_len = decls.length;
     
-        // console.log(decl_len);
     
         if (decl_len == 0) {
             // console.log("NO decls");
@@ -68,7 +90,7 @@ export class Defs {
         // global
     
         decls.forEach(declspc => {
-            // console.log(declspc);
+            // //console.log(declspc);
             if (declspc.decls_spc.$type == ConstDecl) {
                 // console.log("Found a const decl:");
                 const declnames = declspc.decls_spc.const_def;
@@ -85,13 +107,6 @@ export class Defs {
                                 range: new Range(decl.idents.$cstNode.range.start as Position, model.$cstNode?.range.end as Position)
                             };
                             this.vardefs.push(di);
-                            // console.log("%s begins at line: %d, character: %d; ends at line: %d, character: %d",
-                            //     di.ident,
-                            //     di.range.start.line,
-                            //     di.range.start.character,
-                            //     di.range.end.line,
-                            //     di.range.end.character,
-                            // );
                         }
                     }
                     var initial_vals = decl.const_init_val;
@@ -118,13 +133,6 @@ export class Defs {
                                 range: new Range(decl.idents.$cstNode.range.start as Position, model.$cstNode?.range.end as Position)
                             };
                             this.vardefs.push(di);
-                            // console.log("%s begins at line: %d, character: %d; ends at line: %d, character: %d",
-                            //     di.ident,
-                            //     di.range.start.line,
-                            //     di.range.start.character,
-                            //     di.range.end.line,
-                            //     di.range.end.character,
-                            // );
                         }
                     }
                     var initial_vals = decl.init_val;
@@ -149,8 +157,6 @@ export class Defs {
                 funcdef.funcfps.funcfp.forEach(fp => {
                     // console.log(fp.ident.name);
                     if (fp.ident.$cstNode?.range) {
-                        // console.log(fp.ident.$cstNode?.range);
-                        // console.log(funcdef.func);
                         var di = <DefsInside>{
                             ident: fp.ident.name,
                             pos: new Position(fp.ident.$cstNode.range.start.line, fp.ident.$cstNode.range.start.character),
@@ -159,13 +165,6 @@ export class Defs {
                             range: new Range(fp.ident.$cstNode.range.start as Position, funcdef.$cstNode?.range.end as Position)
                         };
                         this.vardefs.push(di);
-                        // console.log("%s begins at line: %d, character: %d; ends at line: %d, character: %d",
-                        //     di.ident,
-                        //     di.range.start.line,
-                        //     di.range.start.character,
-                        //     di.range.end.line,
-                        //     di.range.end.character,
-                        // );
                     }
                 });
             }
@@ -225,14 +224,6 @@ export class Defs {
                                     range: new Range(decl.idents.$cstNode.range.start as Position, blks.$cstNode?.range.end as Position)
                                 };
                                 this.vardefs.push(di);;
-                                    
-                                // console.log("%s begins at line: %d, character: %d; ends at line: %d, character: %d",
-                                //     di.ident,
-                                //     di.range.start.line,
-                                //     di.range.start.character,
-                                //     di.range.end.line,
-                                //     di.range.end.character,
-                                // );
                             }
                         }
                         var initial_vals = decl.const_init_val;
@@ -258,15 +249,8 @@ export class Defs {
                                     belong_to: func,
                                     range: new Range(decl.idents.$cstNode.range.start as Position, blks.$cstNode?.range.end as Position)
                                 };
-                                this.vardefs.push(di);;
+                                this.vardefs.push(di);
                                     
-                                // console.log("%s begins at line: %d, character: %d; ends at line: %d, character: %d",
-                                //     di.ident,
-                                //     di.range.start.line,
-                                //     di.range.start.character,
-                                //     di.range.end.line,
-                                //     di.range.end.character,
-                                // );
                             }
                         }
                         var initial_vals = decl.init_val;
@@ -299,11 +283,8 @@ class ExpCalc{
     }
 
     getExpVal(exp: Exp) : Array<number> {
-        // console.log("cacl exp...");
-        // console.log("type %s", exp.$type);
 
         if (exp.numint != undefined) {
-            // console.log("Found a exp = %d", exp.numint);
             this.vals.push(exp.numint);
             return [];
         }
@@ -314,6 +295,241 @@ class ExpCalc{
         });
 
         return this.vals; 
+    }
+}
 
+
+export class Idents {
+    expcalc = new ExpCalc;
+    vardefs: Array<[string, Position, number, string, Range]> = [];
+
+    getAllIdents(model: Model) {
+
+        if (model.mainfuncdef) {
+            console.log("ok");
+        } else {
+            console.warn("Main Func DOES NOT EXIST!");
+        }
+
+        this.vardefs = [];
+        //console.log("Entering getFuncDefs");
+    
+        const decls = model.decls;
+    
+        var lv: number = 0;
+        // global
+    
+        decls.forEach(declspc => {
+            if (declspc.decls_spc.$type == ConstDecl) {
+                //console.log("Found a const decl:");
+                const declnames = declspc.decls_spc.const_def;
+                declnames.forEach(decl => {
+                    var const_exps = decl.const_exp;
+                    if (const_exps){
+                        const_exps.forEach(const_exp => {
+                            this.traverse_exp(const_exp, lv, "");
+                        });
+                    }
+                    var initial_vals = decl.const_init_val;
+                    if (initial_vals.const_exp) {
+                        this.traverse_exp(initial_vals.const_exp, lv, "");
+                    }
+                    else if (initial_vals.const_init_val){
+                        initial_vals.const_init_val.forEach(const_init_val => {
+                            this.traverse_const_init_val(const_init_val, lv, "");   
+                        });
+                    }
+                });
+            } else if (declspc.decls_spc.$type == VarDecl) {
+                //console.log("Found a var decl:");
+                const declnames = declspc.decls_spc.var_def;
+                declnames.forEach(decl => {
+                    var const_exps = decl.const_exp;
+                    if (const_exps){
+                        const_exps.forEach(const_exp => {
+                            this.traverse_exp(const_exp, lv, "");
+                        });
+                    }
+                    var initial_vals = decl.init_val;
+                    if (initial_vals) {
+                        if (initial_vals.exps) {
+                            this.traverse_exp(initial_vals.exps, lv, "");
+                        }
+                        else if (initial_vals.init_vals){
+                            initial_vals.init_vals.forEach(init_val => {
+                                this.traverse_init_val(init_val, lv, "");   
+                            });
+                        }
+                    }
+                });
+            }
+            
+        });
+
+        const funcdefs = model.funcdefs;
+
+        // funcs, lv+1
+        lv += 1;
+        funcdefs.forEach(funcdef => {
+            if (funcdef.funcfps) {
+                funcdef.funcfps.funcfp.forEach(fp => {
+                    if (fp.const_exp){
+                        fp.const_exp.forEach(cexp=>{
+                            this.traverse_exp(cexp, lv, funcdef.func);
+                        });
+                    }
+                });
+            }
+
+            if (funcdef.blks) {
+                // inside funcdef
+                this.traverse_blk(funcdef.blks, lv, funcdef.func);
+            }
+            
+
+        });
+
+
+        // lv == 1 in mainfunc
+        
+        const mainfuncdef = model.mainfuncdef;
+        if(mainfuncdef){
+            this.traverse_blk(mainfuncdef.blks, lv, "main");
+        }
+
+        return this.vardefs;
+    }
+
+    traverse_stmt(stmt: Stmt, lv: number, func: string) {
+        if (stmt.blks) {
+            this.traverse_blk(stmt.blks, lv , func);
+        }
+        if(stmt.stmts){
+            stmt.stmts.forEach(st => {
+                if (st.blks) {
+                    this.traverse_blk(st.blks, lv, func );
+                }
+                if (st.stmts) {
+                    st.stmts.forEach(b => {
+                        this.traverse_stmt(b, lv , func);
+                    });
+                }
+
+            });
+        }
+        if (stmt.exp){
+            this.traverse_exp(stmt.exp, lv, func);
+        }
+        if (stmt.exps){
+            stmt.exps.forEach(sexp => {
+                this.traverse_exp(sexp, lv, func);
+            });
+        }
+        if (stmt.lv){
+            if (stmt.lv.idents.$cstNode?.range) {
+                //console.log(stmt.lv.idents.$cstNode?.range);
+                if (stmt.$cstNode?.range){
+                    this.vardefs.push([stmt.lv.idents.name, new Position(stmt.lv.idents.$cstNode.range.start.line, stmt.lv.idents.$cstNode.range.start.character), lv, func,
+                        new Range(stmt.lv.idents.$cstNode.range.start as Position, stmt.$cstNode?.range.end as Position)]);
+                }
+            }
+        }
+    }
+
+    traverse_blk(blks: Block, lv: number, func: string) {
+        blks.bis.forEach(fp => {
+            if (fp.decls) {
+                if (fp.decls.decls_spc.$type == ConstDecl){
+                    //console.log("Found a const decl:");
+                    const declnames = fp.decls.decls_spc.const_def;
+                    declnames.forEach(decl => {
+                        var const_exps = decl.const_exp;
+                        if (const_exps){
+                            const_exps.forEach(const_exp => {
+                                this.traverse_exp(const_exp, lv, "");
+                            });
+                        }
+                        var initial_vals = decl.const_init_val;
+                        if (initial_vals.const_exp) {
+                            this.traverse_exp(initial_vals.const_exp, lv, "");
+                        }
+                        else if (initial_vals.const_init_val){
+                            initial_vals.const_init_val.forEach(const_init_val => {
+                                this.traverse_const_init_val(const_init_val, lv, "");   
+                            });
+                        }
+                    });
+                }else if (fp.decls.decls_spc.$type == VarDecl) {
+                    //console.log("Found a var decl:");
+                    const declnames = fp.decls.decls_spc.var_def;
+                    declnames.forEach(decl => {
+                        var const_exps = decl.const_exp;
+                        if (const_exps){
+                            const_exps.forEach(const_exp => {
+                                this.traverse_exp(const_exp, lv, "");
+                            });
+                        }
+                        var initial_vals = decl.init_val;
+                        if (initial_vals) {
+                            if (initial_vals.exps) {
+                                this.traverse_exp(initial_vals.exps, lv, "");
+                            }
+                            else if (initial_vals.init_vals){
+                                initial_vals.init_vals.forEach(init_val => {
+                                    this.traverse_init_val(init_val, lv, "");   
+                                });
+                            }
+                        }
+                    });
+                }
+            } 
+
+            if (fp.stmts) {
+                this.traverse_stmt(fp.stmts, lv + 1, func);
+            }
+
+        });
+    }
+
+    traverse_exp (exps: Exp, lv: number, func: string) {
+        if (exps.exps){
+            exps.exps.forEach(eexp => {
+                this.traverse_exp(eexp, lv, func);
+            });
+        }
+        if (exps.lv){
+            exps.lv.forEach(elv => {
+                //console.log("Ident: %s", elv.idents.name);
+                if (elv.idents.$cstNode?.range) {
+                    //console.log(elv.idents.$cstNode?.range);
+                    if (exps.$cstNode?.range){
+                        this.vardefs.push([elv.idents.name, new Position(elv.idents.$cstNode.range.start.line, elv.idents.$cstNode.range.start.character), lv, func,
+                            new Range(elv.idents.$cstNode.range.start as Position, exps.$cstNode?.range.end as Position)]);
+                    }
+                }
+            });
+        }
+    }
+
+    traverse_const_init_val (const_init_vals: ConstInitVal, lv: number, func: string) {
+        if (const_init_vals.const_exp){
+            this.traverse_exp(const_init_vals.const_exp, lv, func);
+        }
+        else if (const_init_vals.const_init_val){
+            const_init_vals.const_init_val.forEach(civ=>{
+                this.traverse_const_init_val(civ, lv, func);
+            });
+        }
+    }
+
+    traverse_init_val (init_vals: InitVal, lv: number, func: string) {
+        if (init_vals.exps){
+            this.traverse_exp(init_vals.exps, lv, func);
+        }
+        else if (init_vals.init_vals){
+            init_vals.init_vals.forEach(iv=>{
+                this.traverse_init_val(iv, lv, func);
+            });
+        }
     }
 }

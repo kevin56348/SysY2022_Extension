@@ -46,14 +46,14 @@ BlockItem:
     decls=Decl | stmts=Stmt;
 
 Stmt:
-    lv=LVal '=' exps=Exp ';' |
-    (exps=Exp)? ';' | 
+    lv=LVal '=' exp=Exp ';' |
+    (exp=Exp)? ';' | 
     blks=Block | 
     'if' '(' conds=Cond ')' stmts+=Stmt ( 'else' stmts+=Stmt )?  | 
     'while' '(' conds+=Cond ')' stmts+=Stmt |
     'break' ';' | 
     'continue' ';' | 
-    'return' (exps+=Exp)? ';' | 
+    'return' (exp=Exp)? ';' | 
     lv=LVal '=' 'getint''('')'';' | 
     'printf''('str=STRING (',' exps+=Exp)*')'';';
 
@@ -64,7 +64,7 @@ Cond infers Exp:
     exps+=LOrExp;
 
 LVal:
-    idents+=Ident ('[' exps+=Exp ']')*;
+    idents=Ident ('[' exps+=Exp ']')*;
 
 PrimaryExp infers Exp:
     numint=INT | '(' exps+=Exp ')' | lv+=LVal;
