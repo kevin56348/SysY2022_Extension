@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import * as ast from "../language/ASTTest.js"
+import * as ast from "../utils/ASTTest.js"
 import { IdentTable } from "../utils/IdentTable.js";
 
 export class IdentDiagnostic {
@@ -105,7 +105,7 @@ export class IdentDiagnostic {
     async findAllConstDecls(){ 
         const vardefs = await ast.getAstModel();
         this.declsTable.add_arrs_DI(vardefs);
-        console.warn(this.declsTable.nodes)
+        //console.warn(this.declsTable.nodes)
     }
 
     async findAllIdents(){ 

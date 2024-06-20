@@ -1,7 +1,7 @@
 import { parseHelper } from "langium/test";
 import { Block, ConstDecl, Exp, Model, Stmt, VarDecl, ConstInitVal, InitVal, Decl } from "../language/generated/ast.js";
 import { EmptyFileSystem } from "langium";
-import {createSysYServices} from "./sys-y-module.js"
+import {createSysYServices} from "../language/sys-y-module.js"
 import { Position, Range } from "vscode";
 import * as vscode from "vscode";
 // import { isUnionType } from "langium/grammar";
@@ -231,7 +231,7 @@ export class Defs {
                         unused: false
                     };
                     this.vardefs.push(di);
-                    console.log("Added func: ", funcdef.func, " whose params are ", fps);
+                    // console.log("Added func: ", funcdef.func, " whose params are ", fps);
                 }
                 
             } else {
@@ -247,7 +247,7 @@ export class Defs {
                         unused: false
                     };
                     this.vardefs.push(di);
-                    console.log("Added func: ", funcdef.func, " whose params are ", "void");
+                    // console.log("Added func: ", funcdef.func, " whose params are ", "void");
                 }
             }
 
@@ -405,7 +405,7 @@ export class Idents {
         if (model.mainfuncdef) {
             //console.log("ok");
         } else {
-            console.warn("Main Func DOES NOT EXIST!");
+            // console.warn("Main Func DOES NOT EXIST!");
         }
 
         this.vardefs = [];
