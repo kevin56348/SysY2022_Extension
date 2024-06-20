@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import * as ast from "../language/ASTTest.js"
+import * as ast from "../utils/ASTTest.js"
 // import { toString } from 'langium/generate';
 // import { Ident } from '../language/generated/ast.js';
 

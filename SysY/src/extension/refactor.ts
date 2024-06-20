@@ -11,7 +11,7 @@ import {
     Range,
     window
 } from 'vscode';
-import * as ast from "../language/ASTTest.js"
+import * as ast from "../utils/ASTTest.js"
 import { Node, IdentTable } from '../utils/IdentTable.js';
 // import { IdentRename } from './rename.js';
 
@@ -216,7 +216,7 @@ export async function renameIdentCommand(editor: TextEditor, _: TextEditorEdit, 
         }
     });
 
-    console.log(targetTable);
+    //console.log(targetTable);
 
     if(!targetTable.isempty()){
         window.showErrorMessage("Selected item is not an identer.");
@@ -240,10 +240,10 @@ export async function renameIdentCommand(editor: TextEditor, _: TextEditorEdit, 
         }
     });
 
-    console.log(targetTable);
+    //console.log(targetTable);
     editor.edit(edit => {
         targetTable.getnode().forEach(node => {
-            console.log(new Range(node.position, new Position(node.position.line, node.position.character + text.length)));
+            //console.log(new Range(node.position, new Position(node.position.line, node.position.character + text.length)));
             edit.replace(new Range(node.position, new Position(node.position.line, node.position.character + text.length)), newVariableName);
         });
     });

@@ -1,5 +1,5 @@
 import { Position, Range } from "vscode";
-import { DefsInside } from "../language/ASTTest.js";
+import { DefsInside } from "./ASTTest.js";
 
 export interface Node {
     name: string; // ident name
