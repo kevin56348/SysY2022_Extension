@@ -135,4 +135,10 @@ export class IdentTable {
     isempty():boolean{
         return (this.nodes.length != 0);
     }
+
+    inTable(ident_name:string):boolean{
+        return this.nodes.some(node=>{
+            return ident_name === node.name;
+        });
+    }
 }
