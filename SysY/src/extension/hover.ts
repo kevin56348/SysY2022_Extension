@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as ast from "../utils/ASTTest.js"
+import { IdentTable } from '../utils/IdentTable.js';
 // import { toString } from 'langium/generate';
 // import { Ident } from '../language/generated/ast.js';
 
@@ -18,19 +19,22 @@ export class SysYNumberHover implements vscode.HoverProvider {
         let markdownString = new vscode.MarkdownString();
         if (regexHex.test(hoveredWord.toString())) {
             let input: Number = Number(parseInt(hoveredWord.toString(), 16));
-            markdownString.appendCodeblock(`Hex:\n0x${input.toString(16).toUpperCase()}\n\Binary:\n0b${input.toString(2).replace(/(^\s+|\s+$)/, '')}\nOctal:\n0${input.toString(8)}\nDecimal:\n0${input.toString(10)} `, 'sys-y');
+            if (!Number.isNaN(input))
+                markdownString.appendCodeblock(`Hex:\n0x${input.toString(16).toUpperCase()}\n\Binary:\n0b${input.toString(2).replace(/(^\s+|\s+$)/, '')}\nOctal:\n0${input.toString(8)}\nDecimal:\n0${input.toString(10)} `, 'sys-y');
             return {
                 contents: [markdownString]
             };
-        } else if (regexOct.test(hoveredWord.toString())) {
+        } else if (regexOct.test(hoveredWord.toString()) === true) {
             let input: Number = Number(parseInt(hoveredWord.toString(), 8));
-            markdownString.appendCodeblock(`Hex:\n0x${input.toString(16).toUpperCase()}\n\Binary:\n0b${input.toString(2).replace(/(^\s+|\s+$)/, '')}\nOctal:\n0${input.toString(8)}\nDecimal:\n0${input.toString(10)} `, 'sys-y');
+            if (!Number.isNaN(input))
+                markdownString.appendCodeblock(`Hex:\n0x${input.toString(16).toUpperCase()}\n\Binary:\n0b${input.toString(2).replace(/(^\s+|\s+$)/, '')}\nOctal:\n0${input.toString(8)}\nDecimal:\n0${input.toString(10)} `, 'sys-y');
             return {
                 contents: [markdownString]
             };
-        } else if (regexDec.test(hoveredWord.toString())) {
+        } else if (regexDec.test(hoveredWord.toString()) === true) {
             let input: Number = Number(parseInt(hoveredWord.toString(), 10));
-            markdownString.appendCodeblock(`Hex:\n0x${input.toString(16).toUpperCase()}\n\Binary:\n0b${input.toString(2).replace(/(^\s+|\s+$)/, '')}\nOctal:\n0${input.toString(8)}\nDecimal:\n0${input.toString(10)} `, 'sys-y');
+            if (!Number.isNaN(input))
+                markdownString.appendCodeblock(`Hex:\n0x${input.toString(16).toUpperCase()}\n\Binary:\n0b${input.toString(2).replace(/(^\s+|\s+$)/, '')}\nOctal:\n0${input.toString(8)}\nDecimal:\n0${input.toString(10)} `, 'sys-y');
             return {
                 contents: [markdownString]
             };
@@ -44,6 +48,7 @@ export class SysYNumberHover implements vscode.HoverProvider {
 export class SysYIdentHover implements vscode.HoverProvider {
 
     decls: Array<ast.DefsInside> = [];
+    idents: IdentTable = new IdentTable();
 
     public async provideHover(
         document: vscode.TextDocument,
@@ -66,7 +71,7 @@ export class SysYIdentHover implements vscode.HoverProvider {
             markdownString.appendMarkdown(`I am a **WELL-DEFINED** identifier:${hoveredWord} in line ${position.line + 1}\n Def: `);
             markdownString.appendCodeblock(`${document.lineAt(ranges[0].pos.line).text}`, 'sys-y');
             markdownString.appendMarkdown(`At Line: ${ranges[0].pos.line + 1}`);
-        } else if (ranges.length == 0) {
+        } else if (ranges.length == 0 && this.idents.inTable(hoveredWord)) {
             if(hoveredWord.charAt(0) >= 'a' && hoveredWord.charAt(0) <= 'z' || hoveredWord.charAt(0) >= 'A' && hoveredWord.charAt(0) <= 'Z' || hoveredWord.charAt(0) == '_')
             markdownString.appendMarkdown(`I am a **UNDEFINED** identifier:${hoveredWord} in line ${position.line + 1}`);
         } else {
@@ -96,6 +101,16 @@ export class SysYIdentHover implements vscode.HoverProvider {
         this.decls = vardefs;
     };
 
+
+    async findAllIdents(){ 
+        const vardefs = await ast.getAstModel_Ident();
+
+        // console.warn(res);
+        vardefs.forEach(r => {
+            // console.log(r);
+        });
+        this.idents.add_arrs(vardefs);
+    };
 }
 
 
